@@ -270,10 +270,7 @@ async function buildPackages() {
       packages[packageName].versions[version] = {
         ...packageData,
         url: zipAsset.browser_download_url,
-        ...(hashes && { 
-          zipSHA256: hashes.sha256,
-          hash: hashes 
-        })
+        ...(hashes && { zipSHA256: hashes.sha256 })
       };
 
       console.log(`  Added ${packageName}@${version}${hashes ? ' (hashed)' : ''}`);
