@@ -35,15 +35,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build VPM Package Listing
-        run: node scripts/vpm.mjs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build Next.js
         run: npm run build
         env:
           NODE_ENV: production
+
+      - name: Build VPM Package Listing
+        run: node scripts/vpm.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
