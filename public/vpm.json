@@ -1,0 +1,251 @@
+{
+  "name": "My VPM Repository",
+  "author": "Author Name",
+  "url": "https://example.github.io/vpm/index.json",
+  "id": "com.example.vpm",
+  "packages": {
+    "com.example.world-toolkit": {
+      "versions": {
+        "2.1.0": {
+          "name": "com.example.world-toolkit",
+          "displayName": "World Toolkit Pro",
+          "version": "2.1.0",
+          "unity": "2022.3",
+          "unityRelease": "22f1",
+          "description": "A comprehensive toolkit for VRChat world creators. Includes lighting tools, optimization utilities, and interactive systems.",
+          "type": "tool",
+          "license": "MIT",
+          "keywords": ["world", "toolkit", "optimization", "lighting", "udon"],
+          "dependencies": {
+            "com.unity.textmeshpro": "3.0.6",
+            "com.unity.postprocessing": "3.2.2"
+          },
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.8.x",
+            "com.vrchat.udonsharp": "^1.0.0"
+          },
+          "samples": [
+            {
+              "displayName": "Lighting Demo",
+              "description": "Example scene with dynamic lighting setup",
+              "path": "Samples~/LightingDemo"
+            },
+            {
+              "displayName": "Optimization Guide",
+              "description": "Scene demonstrating optimization techniques",
+              "path": "Samples~/OptimizationGuide"
+            }
+          ],
+          "author": {
+            "name": "Author Name",
+            "email": "contact@example.com",
+            "url": "https://github.com/example"
+          },
+          "contributors": [
+            { "name": "Contributor A", "url": "https://github.com/contributor-a" },
+            { "name": "Contributor B" }
+          ],
+          "documentationUrl": "https://docs.example.com/world-toolkit",
+          "changelogUrl": "https://github.com/example/world-toolkit/blob/main/CHANGELOG.md",
+          "licensesUrl": "https://github.com/example/world-toolkit/blob/main/LICENSE",
+          "zipSHA256": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+          "url": "https://github.com/example/world-toolkit/releases/download/2.1.0/com.example.world-toolkit-2.1.0.zip"
+        },
+        "2.0.0": {
+          "name": "com.example.world-toolkit",
+          "displayName": "World Toolkit Pro",
+          "version": "2.0.0",
+          "unity": "2022.3",
+          "description": "A comprehensive toolkit for VRChat world creators.",
+          "license": "MIT",
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.7.x"
+          },
+          "author": {
+            "name": "Author Name",
+            "url": "https://github.com/example"
+          },
+          "zipSHA256": "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567a",
+          "url": "https://github.com/example/world-toolkit/releases/download/2.0.0/com.example.world-toolkit-2.0.0.zip"
+        }
+      }
+    },
+    "com.example.avatar-utils": {
+      "versions": {
+        "1.5.2": {
+          "name": "com.example.avatar-utils",
+          "displayName": "Avatar Utilities",
+          "version": "1.5.2",
+          "unity": "2022.3",
+          "description": "Essential utilities for avatar creators. Includes gesture manager, expression menu builder, and performance analyzer.",
+          "license": "GPL-3.0",
+          "keywords": ["avatar", "utilities", "gestures", "expressions", "performance"],
+          "vpmDependencies": {
+            "com.vrchat.avatars": "^3.8.x"
+          },
+          "samples": [
+            {
+              "displayName": "Gesture Examples",
+              "description": "Pre-made gesture configurations",
+              "path": "Samples~/Gestures"
+            }
+          ],
+          "author": {
+            "name": "Author Name",
+            "email": "contact@example.com",
+            "url": "https://github.com/example"
+          },
+          "changelogUrl": "https://github.com/example/avatar-utils/blob/main/CHANGELOG.md",
+          "zipSHA256": "c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2",
+          "url": "https://github.com/example/avatar-utils/releases/download/1.5.2/com.example.avatar-utils-1.5.2.zip"
+        }
+      }
+    },
+    "com.example.shader-pack": {
+      "versions": {
+        "3.0.0": {
+          "name": "com.example.shader-pack",
+          "displayName": "Shader Pack",
+          "version": "3.0.0",
+          "unity": "2022.3",
+          "description": "Collection of optimized shaders for VRChat avatars. Includes toon shaders, fur shaders, and special effects.",
+          "license": "MIT",
+          "keywords": ["shaders", "toon", "fur", "effects", "avatar"],
+          "vpmDependencies": {
+            "com.vrchat.avatars": "^3.8.x"
+          },
+          "author": {
+            "name": "Author Name",
+            "url": "https://github.com/example"
+          },
+          "contributors": [
+            { "name": "Contributor A", "url": "https://github.com/contributor-a" },
+            { "name": "Contributor B", "url": "https://twitter.com/contributor-b" },
+            { "name": "Contributor C" }
+          ],
+          "documentationUrl": "https://docs.example.com/shaders",
+          "zipSHA256": "d4e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3",
+          "url": "https://github.com/example/shader-pack/releases/download/3.0.0/com.example.shader-pack-3.0.0.zip"
+        }
+      }
+    },
+    "com.example.debug-console": {
+      "versions": {
+        "0.8.0": {
+          "name": "com.example.debug-console",
+          "displayName": "Udon Debug Console",
+          "version": "0.8.0",
+          "unity": "2022.3",
+          "description": "In-game debug console for UdonSharp. View logs, execute commands, and inspect variables at runtime.",
+          "type": "tool",
+          "license": "Apache-2.0",
+          "keywords": ["debug", "console", "udon", "development", "logging"],
+          "dependencies": {
+            "com.unity.textmeshpro": "3.0.6"
+          },
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.8.x",
+            "com.vrchat.udonsharp": "^1.0.0"
+          },
+          "author": {
+            "name": "Author Name",
+            "url": "https://github.com/example"
+          },
+          "zipSHA256": "e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3d4",
+          "url": "https://github.com/example/debug-console/releases/download/0.8.0/com.example.debug-console-0.8.0.zip"
+        }
+      }
+    },
+    "com.example.audio-system": {
+      "versions": {
+        "1.2.0": {
+          "name": "com.example.audio-system",
+          "displayName": "Spatial Audio System",
+          "version": "1.2.0",
+          "unity": "2022.3",
+          "description": "Advanced spatial audio system for VRChat worlds. Features 3D audio zones, music players, and ambient sound management.",
+          "license": "MIT",
+          "keywords": ["audio", "spatial", "music", "ambient", "world"],
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.8.x"
+          },
+          "samples": [
+            {
+              "displayName": "Audio Zones Demo",
+              "description": "Example of different audio zone configurations",
+              "path": "Samples~/AudioZones"
+            },
+            {
+              "displayName": "Music Player",
+              "description": "Ready-to-use music player prefab",
+              "path": "Samples~/MusicPlayer"
+            },
+            {
+              "displayName": "Ambient Sounds",
+              "description": "Nature and environment sound examples",
+              "path": "Samples~/AmbientSounds"
+            }
+          ],
+          "author": {
+            "name": "Author Name",
+            "email": "contact@example.com",
+            "url": "https://github.com/example"
+          },
+          "changelogUrl": "https://github.com/example/audio-system/blob/main/CHANGELOG.md",
+          "zipSHA256": "f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3d4e5",
+          "url": "https://github.com/example/audio-system/releases/download/1.2.0/com.example.audio-system-1.2.0.zip"
+        },
+        "1.1.0": {
+          "name": "com.example.audio-system",
+          "displayName": "Spatial Audio System",
+          "version": "1.1.0",
+          "unity": "2022.3",
+          "description": "Advanced spatial audio system for VRChat worlds.",
+          "license": "MIT",
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.7.x"
+          },
+          "author": {
+            "name": "Author Name"
+          },
+          "url": "https://github.com/example/audio-system/releases/download/1.1.0/com.example.audio-system-1.1.0.zip"
+        },
+        "1.0.0": {
+          "name": "com.example.audio-system",
+          "displayName": "Spatial Audio System",
+          "version": "1.0.0",
+          "unity": "2022.3",
+          "description": "Spatial audio system for VRChat worlds.",
+          "license": "MIT",
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.6.x"
+          },
+          "author": {
+            "name": "Author Name"
+          },
+          "url": "https://github.com/example/audio-system/releases/download/1.0.0/com.example.audio-system-1.0.0.zip"
+        }
+      }
+    },
+    "com.example.common-lib": {
+      "versions": {
+        "1.0.0": {
+          "name": "com.example.common-lib",
+          "displayName": "Common Library",
+          "version": "1.0.0",
+          "unity": "2022.3",
+          "description": "Shared utilities and helpers. Includes math extensions, serialization tools, and UI components.",
+          "type": "library",
+          "license": "MIT",
+          "keywords": ["library", "utilities", "common", "helpers"],
+          "author": {
+            "name": "Author Name",
+            "url": "https://github.com/example"
+          },
+          "zipSHA256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "url": "https://github.com/example/common-lib/releases/download/1.0.0/com.example.common-lib-1.0.0.zip"
+        }
+      }
+    }
+  }
+}
