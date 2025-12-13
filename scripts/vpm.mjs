@@ -303,7 +303,7 @@ async function build() {
     name: vpmConfig.name,
     id: vpmConfig.id,
     url: vpmConfig.url,
-    author: vpmConfig.author,
+    author: vpmConfig.author?.name || vpmConfig.author,
     packages: vpmPackages
   };
 
