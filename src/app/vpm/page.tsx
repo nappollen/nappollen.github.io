@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Package, Copy, Check, Search, Plus, ExternalLink, Info, Loader2, Globe, User, Wrench, Download, Scale, Boxes, History, Hash, Mail, Github, Users, Tag, FileBox, FileText, BookOpen, FileKey, Layers } from 'lucide-react'
+import { Package, Copy, Check, Search, Plus, ExternalLink, Info, Loader2, Globe, User, Wrench, Download, Scale, Boxes, History, Hash, Mail, Github, Users, Tag, FileBox, FileText, BookOpen, FileKey, Layers, ArrowUpRight } from 'lucide-react'
 import { GlobeAltIcon as GlobeAltIconSolid, UserIcon as UserIconSolid, WrenchScrewdriverIcon as WrenchScrewdriverIconSolid } from '@heroicons/react/24/solid'
 import { Modal } from '@/components/Modal'
 import { HeroHeader } from '@/components/HeroHeader'
@@ -401,9 +401,8 @@ export default function VPMPage() {
         ) : (
           <div key={categoryFilter} className="flex flex-col gap-3">
             {filteredPackages.map((pkg, index) => {
-              const catConfig = categoryConfig[pkg.category]
-              const CatIcon = catConfig.icon
-              const CatIconSolid = catConfig.solidIcon
+              const catConfig = categoryConfig[pkg.category];
+              const CatIconSolid = catConfig.solidIcon;
               const youtubeVideoId = pkg.youtubeUrl?.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
               const hasBanner = !youtubeVideoId && pkg.bannerUrl
               return (
@@ -443,7 +442,17 @@ export default function VPMPage() {
                     )}
                     <div className="flex-1 min-w-0 relative z-10">
                       <h3 className="font-semibold text-lg mb-1">
-                        {pkg.displayName || pkg.name}
+                        {
+                          pkg.url ?
+                            (<a href={pkg.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline relative">
+                              {pkg.displayName || pkg.name}
+                              <ArrowUpRight size={14} className="inline-block absolute top-0 -translate-y-1/2 ml-1 text-fd-primary/50" />
+                            </a>)
+                            : (pkg.displayName || pkg.name)
+                        }
                       </h3>
                       <p className="text-fd-muted-foreground text-sm line-clamp-1">
                         {pkg.description || 'No description available.'}
@@ -756,9 +765,9 @@ export default function VPMPage() {
                     <FileKey size={18} />
                   </a>
                 )}
-                {displayedPackage.author?.url && (
+                {displayedPackage?.url && (
                   <a
-                    href={displayedPackage.author.url}
+                    href={displayedPackage.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"

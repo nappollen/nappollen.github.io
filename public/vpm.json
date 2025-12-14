@@ -160,7 +160,7 @@
             "sha512": "6cd88b4ab687e7457c5ab904a8258068168d7ec6eae041efe59992d9a6b15e8dfa0a3855cbaa41e3273bb0dd9d265241a5478fc81714a1639b639c4d816bbd7f"
           },
           "zipSHA256": "e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3d4",
-          "url": "https://github.com/example/debug-console/releases/download/0.8.0/com.example.debug-console-0.8.0.zip"
+          "url": "https://github.com/example/debug-console"
         }
       }
     },
