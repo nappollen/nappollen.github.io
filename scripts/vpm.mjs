@@ -270,14 +270,62 @@ async function buildPackages() {
       packages[packageName].versions[version] = {
         ...packageData,
         url: zipAsset.browser_download_url,
-        ...(hashes && { zipSHA256: hashes.sha256 })
+        ...(hashes && { 
+          zipSHA256: hashes.sha256,
+          hash: hashes 
+        })
       };
 
       console.log(`  Added ${packageName}@${version}${hashes ? ' (hashed)' : ''}`);
     }
 
-    // Store GitHub repo info separately (not in VPM format)
-    // The VPM format only expects { versions: { ... } } for each package
+    // Add GitHub repo info to package level
+    if (currentPackageName && packages[currentPackageName] && repoInfo) {
+      const baseUrl = repoInfo.html_url;
+      const branch = repoInfo.default_branch;
+      
+      // Build URLs for common files
+      const readmeUrl = `${baseUrl}/blob/${branch}/README.md`;
+      const licenseUrl = repoInfo.license ? `${baseUrl}/blob/${branch}/LICENSE` : null;
+      const changelogUrl = `${baseUrl}/blob/${branch}/CHANGELOG.md`;
+      
+      packages[currentPackageName] = {
+        owner: {
+          login: repoInfo.owner?.login,
+          avatar_url: repoInfo.owner?.avatar_url,
+          url: repoInfo.owner?.html_url
+        },
+        name: repoInfo.name,
+        full_name: repoInfo.full_name,
+        description: repoInfo.description,
+        url: repoInfo.html_url,
+        clone_url: repoInfo.clone_url,
+        language: repoInfo.language,
+        languages: languages,
+        size: repoInfo.size,
+        stars: repoInfo.stargazers_count,
+        watchers: repoInfo.watchers_count,
+        forks: repoInfo.forks_count,
+        open_issues: repoInfo.open_issues_count,
+        license: repoInfo.license?.spdx_id,
+        license_url: licenseUrl,
+        readme_url: readmeUrl,
+        changelog_url: changelogUrl,
+        topics: repoInfo.topics,
+        default_branch: branch,
+        archived: repoInfo.archived,
+        disabled: repoInfo.disabled,
+        has_issues: repoInfo.has_issues,
+        has_wiki: repoInfo.has_wiki,
+        has_discussions: repoInfo.has_discussions,
+        contributors: contributors,
+        commit_activity: commitActivity,
+        created_at: repoInfo.created_at ? Math.floor(new Date(repoInfo.created_at).getTime() / 1000) : null,
+        updated_at: repoInfo.updated_at ? Math.floor(new Date(repoInfo.updated_at).getTime() / 1000) : null,
+        pushed_at: repoInfo.pushed_at ? Math.floor(new Date(repoInfo.pushed_at).getTime() / 1000) : null,
+        ...packages[currentPackageName]
+      };
+    }
   }
 
   return packages;
@@ -290,21 +338,13 @@ async function build() {
   console.log('Building VPM index.json...\n');
 
   const packages = await buildPackages();
-  
-  // Create VPM-compliant format (only versions, no extra metadata)
-  const vpmPackages = {};
-  for (const [name, pkg] of Object.entries(packages)) {
-    vpmPackages[name] = {
-      versions: pkg.versions
-    };
-  }
 
   const index = {
     name: vpmConfig.name,
     id: vpmConfig.id,
     url: vpmConfig.url,
-    author: vpmConfig.author?.name || vpmConfig.author,
-    packages: vpmPackages
+    author: vpmConfig.author,
+    packages
   };
 
   // Output directory

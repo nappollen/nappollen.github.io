@@ -13,10 +13,7 @@ interface SourceConfig {
   name: string
   id: string
   url: string
-  author: {
-    name: string
-    url?: string
-  }
+  author: string,
   description: string
   infoLink?: {
     url: string

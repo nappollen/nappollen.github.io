@@ -5,10 +5,7 @@
         "name": "Nappollen's VPM",
         "id": "nappollen.vpm",
         "url": "https://nappollen.github.io/vpm.json",
-        "author": {
-            "name": "Nappollen",
-            "url": "https://nappollen.github.io"
-        },
+        "author": "Nappollen",
         "description": "VRChat packages for creators. Install directly via Creator Companion.",
         "infoLink": {
             "url": "https://github.com/nappollen",
