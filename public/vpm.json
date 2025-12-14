@@ -47,6 +47,7 @@
           ],
           "documentationUrl": "https://docs.example.com/world-toolkit",
           "changelogUrl": "https://github.com/example/world-toolkit/blob/main/CHANGELOG.md",
+          "youtubeUrl": "https://www.youtube.com/watch?v=FtutLA63Cp8",
           "licensesUrl": "https://github.com/example/world-toolkit/blob/main/LICENSE",
           "zipSHA256": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
           "url": "https://github.com/example/world-toolkit/releases/download/2.1.0/com.example.world-toolkit-2.1.0.zip"
@@ -143,6 +144,7 @@
           "dependencies": {
             "com.unity.textmeshpro": "3.0.6"
           },
+          "bannerUrl": "https://picsum.photos/seed/picsum/1920/1080",
           "vpmDependencies": {
             "com.vrchat.worlds": "^3.8.x",
             "com.vrchat.udonsharp": "^1.0.0"

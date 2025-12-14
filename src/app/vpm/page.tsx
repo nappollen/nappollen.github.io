@@ -32,6 +32,8 @@ interface PackageVersion {
   unityRelease?: string
   license?: string
   url?: string
+  youtubeUrl?: string
+  bannerUrl?: string
   changelogUrl?: string
   documentationUrl?: string
   licensesUrl?: string
@@ -70,6 +72,8 @@ interface PackageInfo {
   unityRelease?: string
   license?: string
   url?: string
+  youtubeUrl?: string
+  bannerUrl?: string
   changelogUrl?: string
   documentationUrl?: string
   licensesUrl?: string
@@ -200,6 +204,8 @@ export default function VPMPage() {
             unityRelease: latestVersion.unityRelease,
             license: latestVersion.license,
             url: latestVersion.url,
+            youtubeUrl: latestVersion.youtubeUrl,
+            bannerUrl: latestVersion.bannerUrl,
             changelogUrl: latestVersion.changelogUrl,
             documentationUrl: latestVersion.documentationUrl,
             licensesUrl: latestVersion.licensesUrl,
@@ -386,24 +392,51 @@ export default function VPMPage() {
               const catConfig = categoryConfig[pkg.category]
               const CatIcon = catConfig.icon
               const CatIconSolid = catConfig.solidIcon
+              const youtubeVideoId = pkg.youtubeUrl?.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
+              const hasBanner = !youtubeVideoId && pkg.bannerUrl
               return (
                 <article
                   key={pkg.name}
-                  className={`relative overflow-hidden p-4 bg-fd-card border border-fd-border border-l-4 ${catConfig.borderColor} rounded-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-4 animate-in fade-in slide-in-from-bottom-2`}
+                  className={`relative overflow-hidden bg-fd-card border border-fd-border border-l-4 ${catConfig.borderColor} rounded-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-2`}
                   style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
                 >
-                  {/* Background Icon */}
-                  <CatIconSolid 
-                    className={`absolute -right-4 top-1/2 -translate-y-1/2 w-28 h-28 ${catConfig.iconColor} pointer-events-none`}
-                  />
-                  <div className="flex-1 min-w-0 relative z-10">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {pkg.displayName || pkg.name}
-                    </h3>
-                    <p className="text-fd-muted-foreground text-sm line-clamp-1">
-                      {pkg.description || 'No description available.'}
-                    </p>
-                  </div>
+                  {/* YouTube Embed */}
+                  {youtubeVideoId && (
+                    <div className="relative aspect-video bg-fd-muted z-1">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                        title={`${pkg.displayName || pkg.name} preview`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    </div>
+                  )}
+                  {/* Banner Image */}
+                  {hasBanner && (
+                    <div className="relative aspect-video bg-fd-muted z-1">
+                      <img
+                        src={pkg.bannerUrl}
+                        alt={`${pkg.displayName || pkg.name} banner`}
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                  )}
+                  <div className={`relative p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${!youtubeVideoId ? '' : ''} z-0`}>
+                    {/* Background Icon */}
+                    {!youtubeVideoId && !hasBanner && (
+                      <CatIconSolid 
+                        className={`absolute -right-4 top-1/2 -translate-y-1/2 w-28 h-28 ${catConfig.iconColor} pointer-events-none`}
+                      />
+                    )}
+                    <div className="flex-1 min-w-0 relative z-10">
+                      <h3 className="font-semibold text-lg mb-1">
+                        {pkg.displayName || pkg.name}
+                      </h3>
+                      <p className="text-fd-muted-foreground text-sm line-clamp-1">
+                        {pkg.description || 'No description available.'}
+                      </p>
+                    </div>
                   <div className="flex gap-3 items-center sm:flex-shrink-0 relative z-10">
                     {pkg.documentationUrl && (
                       <a
@@ -430,6 +463,7 @@ export default function VPMPage() {
                       <Info size={16} />
                     </button>
                   </div>
+                  </div>
                 </article>
               )
             })}
@@ -450,6 +484,22 @@ export default function VPMPage() {
           const hasUnityDeps = displayedPackage.dependencies && Object.keys(displayedPackage.dependencies).length > 0
           return (
             <>
+              {/* YouTube Embed */}
+              {displayedPackage.youtubeUrl && (() => {
+                const videoId = displayedPackage.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
+                return videoId ? (
+                  <div className="mb-4 rounded-lg overflow-hidden aspect-video bg-fd-muted">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title="YouTube video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  </div>
+                ) : null
+              })()}
+
               {/* Description */}
               <p className="text-fd-muted-foreground mb-4">
                 {displayedPackage.description || 'No description available.'}
