@@ -6,6 +6,7 @@ import { GlobeAltIcon as GlobeAltIconSolid, UserIcon as UserIconSolid, WrenchScr
 import { Modal } from '@/components/Modal'
 import { HeroHeader } from '@/components/HeroHeader'
 import sourceConfig from '@/../source.json'
+import PixelBlast from '@/components/PixelBlast'
 
 type PackageCategory = 'world' | 'avatar' | 'tool'
 
@@ -263,31 +264,41 @@ export default function VPMPage() {
             VRChat Creator Companion
           </>
         }
+        customBackground={<PixelBlast
+          variant="square"
+          pixelSize={4}
+          color={primaryColor}
+          patternScale={2}
+          patternDensity={1}
+          pixelSizeJitter={0}
+          speed={0.5}
+          edgeFade={0.25}
+          enableRipples
+          transparent
+        />}
         title={config.name}
         description={config.description}
         primaryColor={primaryColor}
-        footer={
-          <>
-            <button
-              onClick={() => setShowHelp(true)}
+        footer={<>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+          >
+            <Info size={16} />
+            How to install?
+          </button>
+          {config.infoLink && (
+            <a
+              href={config.infoLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
             >
-              <Info size={16} />
-              How to install?
-            </button>
-            {config.infoLink && (
-              <a
-                href={config.infoLink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
-              >
-                <Github size={16} />
-                {config.infoLink.text}
-              </a>
-            )}
-          </>
-        }
+              <Github size={16} />
+              {config.infoLink.text}
+            </a>
+          )}
+        </>}
       >
         {/* URL + Add to VCC Button Group */}
         <div className="flex justify-center mb-6">

@@ -6,32 +6,43 @@ import dynamic from 'next/dynamic';
 import { Package, BookOpen, Github, Wrench, Gamepad2, Code2, Sparkles, Youtube, ArrowRight } from 'lucide-react';
 import { HeroHeader } from '@/components/HeroHeader';
 import sourceConfig from '@/../source.json';
-
-const FaultyTerminal = dynamic(() => import('@/components/FaultyTerminal'), { ssr: false });
-
-const FaultyTerminalBackground = (
-  <div className="w-full h-full opacity-30">
-    <FaultyTerminal
-      scale={1.2}
-      gridMul={[4, 1]}
-      digitSize={1.2}
-      timeScale={0.2}
-      scanlineIntensity={0.5}
-      glitchAmount={0.8}
-      flickerAmount={0.5}
-      noiseAmp={0.9}
-      chromaticAberration={2}
-      curvature={0.1}
-      tint="#888888"
-      mouseReact
-      mouseStrength={0.3}
-      brightness={0.8}
-      pageLoadAnimation
-    />
-  </div>
-);
+import FaultyTerminal from '@/components/FaultyTerminal';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
+  const [primaryColor, setPrimaryColor] = useState('#888888')
+
+  // Get primary color from CSS variable
+  useEffect(() => {
+    const updateColor = () => {
+      const style = getComputedStyle(document.documentElement)
+      const fdPrimary = style.getPropertyValue('--fd-primary').trim()
+      if (fdPrimary) {
+        // Convert oklch or hsl to hex if needed
+        const temp = document.createElement('div')
+        temp.style.color = fdPrimary
+        document.body.appendChild(temp)
+        const computed = getComputedStyle(temp).color
+        document.body.removeChild(temp)
+
+        // Parse rgb(r, g, b) to hex
+        const match = computed.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+        if (match) {
+          const hex = '#' + [match[1], match[2], match[3]]
+            .map(x => parseInt(x).toString(16).padStart(2, '0'))
+            .join('')
+          setPrimaryColor(hex)
+        }
+      }
+    }
+    updateColor()
+
+    // Update on theme change
+    const observer = new MutationObserver(updateColor)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <>
       <HeroHeader
@@ -43,7 +54,22 @@ export default function HomePage() {
         }
         title={sourceConfig.title || 'Default'}
         description={sourceConfig.description || 'Welcome to my portfolio!'}
-        customBackground={FaultyTerminalBackground}
+        customBackground={<FaultyTerminal
+          scale={1.2}
+          gridMul={[4, 1]}
+          digitSize={1.2}
+          timeScale={0.2}
+          scanlineIntensity={0.5}
+          glitchAmount={0.8}
+          flickerAmount={0.5}
+          noiseAmp={0.9}
+          chromaticAberration={2}
+          curvature={0.1}
+          tint={primaryColor}
+          mouseStrength={0.3}
+          brightness={0.4}
+          pageLoadAnimation={false}
+        />}
       >
         <div className="flex flex-wrap gap-3 justify-center">
           {sourceConfig.links.github && <a

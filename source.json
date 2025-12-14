@@ -12,7 +12,8 @@
             "text": "View on GitHub"
         },
         "githubRepos": [
-            "nappollen/packager"
+            "nappollen/packager",
+            "nappollen/udon-inspector"
         ]
     },
     "links": {
