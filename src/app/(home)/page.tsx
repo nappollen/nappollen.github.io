@@ -6,8 +6,11 @@ import dynamic from 'next/dynamic';
 import { Package, BookOpen, Github, Wrench, Gamepad2, Code2, Sparkles, Youtube, ArrowRight } from 'lucide-react';
 import { HeroHeader } from '@/components/HeroHeader';
 import sourceConfig from '@/../source.json';
-import FaultyTerminal from '@/components/FaultyTerminal';
 import { useEffect, useState } from 'react';
+
+const FaultyTerminal = dynamic(() => import('@/components/FaultyTerminal'), {
+  ssr: false,
+});
 
 export default function HomePage() {
   const [primaryColor, setPrimaryColor] = useState('#888888')
