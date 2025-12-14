@@ -381,11 +381,9 @@ export default function VPMPage() {
                   )}
                   <div className={`relative p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${!youtubeVideoId ? '' : ''} z-0`}>
                     {/* Background Icon */}
-                    {!youtubeVideoId && !hasBanner && (
-                      <CatIconSolid
-                        className={`absolute -right-4 top-1/2 -translate-y-1/2 w-28 h-28 ${catConfig.iconColor} pointer-events-none`}
-                      />
-                    )}
+                    <CatIconSolid
+                      className={`absolute -right-4 top-1/2 -translate-y-1/2 w-28 h-28 ${catConfig.iconColor} pointer-events-none`}
+                    />
                     <div className="flex-1 min-w-0 relative z-10">
                       <h3 className="font-semibold text-lg mb-1">
                         {
