@@ -38,6 +38,7 @@ interface PackageVersion {
   documentationUrl?: string
   licensesUrl?: string
   type?: string
+  hash?: string
   author?: {
     name: string
     email?: string
@@ -78,6 +79,7 @@ interface PackageInfo {
   documentationUrl?: string
   licensesUrl?: string
   type?: string
+  hash?: string
   zipSHA256?: string
   author?: {
     name: string
@@ -155,7 +157,7 @@ export default function VPMPage() {
         document.body.appendChild(temp)
         const computed = getComputedStyle(temp).color
         document.body.removeChild(temp)
-        
+
         // Parse rgb(r, g, b) to hex
         const match = computed.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
         if (match) {
@@ -167,7 +169,7 @@ export default function VPMPage() {
       }
     }
     updateColor()
-    
+
     // Update on theme change
     const observer = new MutationObserver(updateColor)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
@@ -187,13 +189,13 @@ export default function VPMPage() {
         // En dev, charge depuis /vpm.json (public/), en prod depuis le basePath
         const res = await fetch('/vpm.json')
         const data: VPMIndex = await res.json()
-        
+
         // Extraire la dernière version de chaque package
         const pkgList: PackageInfo[] = Object.entries(data.packages).map(([id, pkg]) => {
-          const versions = Object.keys(pkg.versions).sort((a, b) => 
+          const versions = Object.keys(pkg.versions).sort((a, b) =>
             b.localeCompare(a, undefined, { numeric: true })
           )
-          const latestVersion = pkg.versions[versions[0]] as PackageVersion & { zipSHA256?: string }
+          const latestVersion = pkg.versions[versions[0]] as PackageVersion & { zipSHA256?: string; hash?: string }
           return {
             name: latestVersion.name,
             displayName: latestVersion.displayName || latestVersion.name,
@@ -210,6 +212,7 @@ export default function VPMPage() {
             documentationUrl: latestVersion.documentationUrl,
             licensesUrl: latestVersion.licensesUrl,
             type: latestVersion.type,
+            hash: latestVersion.hash,
             zipSHA256: latestVersion.zipSHA256,
             author: latestVersion.author,
             contributors: latestVersion.contributors,
@@ -223,7 +226,7 @@ export default function VPMPage() {
             })),
           }
         })
-        
+
         setPackages(pkgList)
       } catch (error) {
         console.error('Failed to load packages:', error)
@@ -231,7 +234,7 @@ export default function VPMPage() {
         setLoading(false)
       }
     }
-    
+
     loadPackages()
   }, [])
 
@@ -239,8 +242,8 @@ export default function VPMPage() {
     (pkg) =>
       (categoryFilter === 'all' || pkg.category === categoryFilter) &&
       (pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pkg.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pkg.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+        pkg.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pkg.description?.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   const copyUrl = async () => {
@@ -330,16 +333,15 @@ export default function VPMPage() {
               />
             </div>
           </div>
-          
+
           {/* Category Filter */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <button
               onClick={() => setCategoryFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                categoryFilter === 'all'
-                  ? 'bg-fd-primary text-fd-primary-foreground'
-                  : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${categoryFilter === 'all'
+                ? 'bg-fd-primary text-fd-primary-foreground'
+                : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
+                }`}
             >
               All
             </button>
@@ -353,11 +355,10 @@ export default function VPMPage() {
                   <button
                     key={cat}
                     onClick={() => setCategoryFilter(cat)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      categoryFilter === cat
-                        ? 'bg-fd-primary text-fd-primary-foreground'
-                        : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${categoryFilter === cat
+                      ? 'bg-fd-primary text-fd-primary-foreground'
+                      : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
+                      }`}
                   >
                     <Icon size={14} />
                     {config.label}
@@ -425,7 +426,7 @@ export default function VPMPage() {
                   <div className={`relative p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${!youtubeVideoId ? '' : ''} z-0`}>
                     {/* Background Icon */}
                     {!youtubeVideoId && !hasBanner && (
-                      <CatIconSolid 
+                      <CatIconSolid
                         className={`absolute -right-4 top-1/2 -translate-y-1/2 w-28 h-28 ${catConfig.iconColor} pointer-events-none`}
                       />
                     )}
@@ -437,32 +438,32 @@ export default function VPMPage() {
                         {pkg.description || 'No description available.'}
                       </p>
                     </div>
-                  <div className="flex gap-3 items-center sm:flex-shrink-0 relative z-10">
-                    {pkg.documentationUrl && (
+                    <div className="flex gap-3 items-center sm:flex-shrink-0 relative z-10">
+                      {pkg.documentationUrl && (
+                        <a
+                          href={pkg.documentationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+                          title="Documentation"
+                        >
+                          <BookOpen size={16} />
+                        </a>
+                      )}
                       <a
-                        href={pkg.documentationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
-                        title="Documentation"
+                        href={vccUrl}
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-fd-primary text-fd-primary-foreground rounded-lg text-sm font-medium hover:bg-fd-primary/80 transition-colors"
                       >
-                        <BookOpen size={16} />
+                        <Plus size={16} />
+                        Add to VCC
                       </a>
-                    )}
-                    <a
-                      href={vccUrl}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-fd-primary text-fd-primary-foreground rounded-lg text-sm font-medium hover:bg-fd-primary/80 transition-colors"
-                    >
-                      <Plus size={16} />
-                      Add to VCC
-                    </a>
-                    <button
-                      onClick={() => setSelectedPackage(pkg)}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
-                    >
-                      <Info size={16} />
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => setSelectedPackage(pkg)}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+                      >
+                        <Info size={16} />
+                      </button>
+                    </div>
                   </div>
                 </article>
               )
@@ -639,16 +640,20 @@ export default function VPMPage() {
                 )}
               </div>
 
-              {/* SHA256 */}
-              {displayedPackage.zipSHA256 && (
+              {/* Hash */}
+              {(displayedPackage.hash || displayedPackage.zipSHA256) && (
                 <div className="mb-4">
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1">
                     <Hash size={12} />
-                    SHA256
+                    Hashs
                   </span>
-                  <p className="font-mono text-xs bg-fd-muted px-2 py-1 rounded break-all text-fd-muted-foreground select-all">
-                    {displayedPackage.zipSHA256}
-                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries((displayedPackage.hash || { "sha256": displayedPackage.zipSHA256 })).map((hashType, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded text-xs bg-fd-muted text-fd-muted-foreground font-mono truncate max-w-full">
+                        {hashType[0].toUpperCase()}:{hashType[1]}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -778,21 +783,19 @@ export default function VPMPage() {
         <div className="flex gap-1 p-1 bg-fd-muted rounded-lg mb-4">
           <button
             onClick={() => setHelpTab('auto')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              helpTab === 'auto'
-                ? 'bg-fd-background text-fd-foreground shadow-sm'
-                : 'text-fd-muted-foreground hover:text-fd-foreground'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${helpTab === 'auto'
+              ? 'bg-fd-background text-fd-foreground shadow-sm'
+              : 'text-fd-muted-foreground hover:text-fd-foreground'
+              }`}
           >
             Automatic
           </button>
           <button
             onClick={() => setHelpTab('manual')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              helpTab === 'manual'
-                ? 'bg-fd-background text-fd-foreground shadow-sm'
-                : 'text-fd-muted-foreground hover:text-fd-foreground'
-            }`}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${helpTab === 'manual'
+              ? 'bg-fd-background text-fd-foreground shadow-sm'
+              : 'text-fd-muted-foreground hover:text-fd-foreground'
+              }`}
           >
             Manual
           </button>
@@ -823,7 +826,7 @@ export default function VPMPage() {
                     </div>
                     {/* Cursor */}
                     <svg className="absolute -bottom-2 -right-2 w-6 h-6 drop-shadow-md" viewBox="0 0 24 24">
-                      <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.48 0 .72-.58.38-.92L6.35 2.85a.5.5 0 0 0-.85.36Z" fill="black" stroke="white" strokeWidth="1.5"/>
+                      <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.48 0 .72-.58.38-.92L6.35 2.85a.5.5 0 0 0-.85.36Z" fill="black" stroke="white" strokeWidth="1.5" />
                     </svg>
                   </div>
                 </div>
