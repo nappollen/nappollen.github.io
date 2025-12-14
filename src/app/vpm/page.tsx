@@ -29,17 +29,21 @@ interface PackageVersion {
   displayName: string
   description: string
   version: string
+  hash: string
+  zipSHA256: string
+  url: string
+
+
+
   unity?: string
   unityRelease?: string
   license?: string
-  url?: string
   youtubeUrl?: string
   bannerUrl?: string
   changelogUrl?: string
   documentationUrl?: string
   licensesUrl?: string
   type?: string
-  hash?: string
   author?: {
     name: string
     email?: string
@@ -64,57 +68,20 @@ interface PackageVersion {
   keywords?: string[]
 }
 
-interface PackageInfo {
+interface PackageInfos {
   name: string
-  displayName: string
-  description: string
-  version: string
+  url: string
   category: PackageCategory
-  unity?: string
-  unityRelease?: string
-  license?: string
-  url?: string
-  youtubeUrl?: string
-  bannerUrl?: string
-  changelogUrl?: string
-  documentationUrl?: string
-  licensesUrl?: string
-  type?: string
-  hash?: string
-  zipSHA256?: string
-  author?: {
-    name: string
-    email?: string
-    url?: string
+  release: PackageVersion
+  versions: {
+    [version: string]: PackageVersion
   }
-  contributors?: {
-    name: string
-    email?: string
-    url?: string
-  }[]
-  dependencies?: {
-    [key: string]: string
-  }
-  vpmDependencies?: {
-    [key: string]: string
-  }
-  samples?: {
-    displayName: string
-    description: string
-    path: string
-  }[]
-  keywords?: string[]
-  allVersions?: { version: string; url?: string }[]
 }
 
 interface VPMIndex {
   name: string
   packages: {
-    [key: string]: {
-      versions: {
-        [version: string]: PackageVersion
-      }
-    }
+    [key: string]: PackageInfos
   }
 }
 
@@ -139,10 +106,10 @@ export default function VPMPage() {
   const [copied, setCopied] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [helpTab, setHelpTab] = useState<'auto' | 'manual'>('auto')
-  const [packages, setPackages] = useState<PackageInfo[]>([])
+  const [vpm, setVPM] = useState<VPMIndex>({ name: '', packages: {} })
   const [loading, setLoading] = useState(true)
-  const [selectedPackage, setSelectedPackage] = useState<PackageInfo | null>(null)
-  const [displayedPackage, setDisplayedPackage] = useState<PackageInfo | null>(null)
+  const [selectedPackage, setSelectedPackage] = useState<PackageInfos | null>(null)
+  const [displayedPackage, setDisplayedPackage] = useState<PackageInfos | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<PackageCategory | 'all'>('all')
   const [primaryColor, setPrimaryColor] = useState('#888888')
 
@@ -188,47 +155,25 @@ export default function VPMPage() {
     async function loadPackages() {
       try {
         // En dev, charge depuis /vpm.json (public/), en prod depuis le basePath
-        const res = await fetch('/vpm.json')
-        const data: VPMIndex = await res.json()
-
-        // Extraire la dernière version de chaque package
-        const pkgList: PackageInfo[] = Object.entries(data.packages).map(([id, pkg]) => {
-          const versions = Object.keys(pkg.versions).sort((a, b) =>
-            b.localeCompare(a, undefined, { numeric: true })
-          )
-          const latestVersion = pkg.versions[versions[0]] as PackageVersion & { zipSHA256?: string; hash?: string }
-          return {
-            name: latestVersion.name,
-            displayName: latestVersion.displayName || latestVersion.name,
-            description: latestVersion.description || '',
-            version: latestVersion.version,
-            category: detectCategory(latestVersion.vpmDependencies),
-            unity: latestVersion.unity,
-            unityRelease: latestVersion.unityRelease,
-            license: latestVersion.license,
-            url: latestVersion.url,
-            youtubeUrl: latestVersion.youtubeUrl,
-            bannerUrl: latestVersion.bannerUrl,
-            changelogUrl: latestVersion.changelogUrl,
-            documentationUrl: latestVersion.documentationUrl,
-            licensesUrl: latestVersion.licensesUrl,
-            type: latestVersion.type,
-            hash: latestVersion.hash,
-            zipSHA256: latestVersion.zipSHA256,
-            author: latestVersion.author,
-            contributors: latestVersion.contributors,
-            dependencies: latestVersion.dependencies,
-            vpmDependencies: latestVersion.vpmDependencies,
-            samples: latestVersion.samples,
-            keywords: latestVersion.keywords,
-            allVersions: versions.map(v => ({
-              version: v,
-              url: (pkg.versions[v] as PackageVersion & { url?: string }).url
-            })),
-          }
-        })
-
-        setPackages(pkgList)
+        const res = await fetch('/vpm.json?t=' + Date.now());
+        if (!res.ok)
+          throw new Error(`Failed to fetch packages: ${res.status} ${res.statusText}`);
+        const data: VPMIndex = await res.json();
+        setVPM({
+          ...data,
+          packages: Object.fromEntries(
+            Object.entries(data.packages)
+              .filter(([_, pkg]) => Object.keys(pkg.versions).length > 0)
+              .sort((a, b) => a[0].localeCompare(b[0]))
+              .map(([key, pkg]) => ([
+                key, {
+                  ...pkg,
+                  name: key,
+                  release: pkg.versions[Object.keys(pkg.versions)[0]],
+                  category: detectCategory(pkg.versions[Object.keys(pkg.versions)[0]].vpmDependencies),
+                }]))
+          ),
+        });
       } catch (error) {
         console.error('Failed to load packages:', error)
       } finally {
@@ -239,12 +184,13 @@ export default function VPMPage() {
     loadPackages()
   }, [])
 
-  const filteredPackages = packages.filter(
+  const filteredPackages = Object.values(vpm.packages).filter(
     (pkg) =>
+      pkg.name &&
       (categoryFilter === 'all' || pkg.category === categoryFilter) &&
-      (pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pkg.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pkg.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+      (pkg.name.toLowerCase().includes(searchTerm.toLowerCase())
+        || pkg.release.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
+        || pkg.release.description?.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   const copyUrl = async () => {
@@ -358,10 +304,10 @@ export default function VPMPage() {
             </button>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(categoryConfig) as PackageCategory[]).map((cat) => {
-                const config = categoryConfig[cat]
-                const Icon = config.icon
-                const count = packages.filter(p => p.category === cat).length
-                if (count === 0) return null
+                const config = categoryConfig[cat];
+                const Icon = config.icon;
+                const count = Object.values(vpm.packages).filter(pkg => pkg.category === cat).length;
+                if (count === 0) return null;
                 return (
                   <button
                     key={cat}
@@ -390,10 +336,10 @@ export default function VPMPage() {
           <div className="text-center py-16 bg-fd-card border border-fd-border rounded-xl">
             <Package size={48} className="mx-auto mb-4 text-fd-muted-foreground/50" />
             <h3 className="text-lg font-medium mb-2">
-              {packages.length === 0 ? 'No packages yet' : 'No results'}
+              {Object.keys(vpm.packages).length === 0 ? 'No packages yet' : 'No results'}
             </h3>
             <p className="text-fd-muted-foreground text-sm max-w-sm mx-auto">
-              {packages.length === 0
+              {Object.keys(vpm.packages).length === 0
                 ? 'Packages will be available soon. Check back later!'
                 : 'Try different search terms.'}
             </p>
@@ -403,8 +349,8 @@ export default function VPMPage() {
             {filteredPackages.map((pkg, index) => {
               const catConfig = categoryConfig[pkg.category];
               const CatIconSolid = catConfig.solidIcon;
-              const youtubeVideoId = pkg.youtubeUrl?.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
-              const hasBanner = !youtubeVideoId && pkg.bannerUrl
+              const youtubeVideoId = pkg.release.youtubeUrl?.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
+              const hasBanner = !youtubeVideoId && pkg.release.bannerUrl;
               return (
                 <article
                   key={pkg.name}
@@ -416,7 +362,7 @@ export default function VPMPage() {
                     <div className="relative aspect-video bg-fd-muted z-1">
                       <iframe
                         src={`https://www.youtube.com/embed/${youtubeVideoId}`}
-                        title={`${pkg.displayName || pkg.name} preview`}
+                        title={`${pkg.release.displayName || pkg.name} preview`}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className="w-full h-full"
@@ -427,8 +373,8 @@ export default function VPMPage() {
                   {hasBanner && (
                     <div className="relative aspect-video bg-fd-muted z-1">
                       <img
-                        src={pkg.bannerUrl}
-                        alt={`${pkg.displayName || pkg.name} banner`}
+                        src={pkg.release.bannerUrl}
+                        alt={`${pkg.release.displayName || pkg.name} banner`}
                         className="w-full h-full object-cover object-center"
                       />
                     </div>
@@ -448,20 +394,20 @@ export default function VPMPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="hover:underline relative">
-                              {pkg.displayName || pkg.name}
+                              {pkg.release.displayName || pkg.name}
                               <ArrowUpRight size={14} className="inline-block absolute top-0 -translate-y-1/2 ml-1 text-fd-primary/50" />
                             </a>)
-                            : (pkg.displayName || pkg.name)
+                            : (pkg.release.displayName || pkg.name)
                         }
                       </h3>
                       <p className="text-fd-muted-foreground text-sm line-clamp-1">
-                        {pkg.description || 'No description available.'}
+                        {pkg.release.description || 'No description available.'}
                       </p>
                     </div>
                     <div className="flex gap-3 items-center sm:flex-shrink-0 relative z-10">
-                      {pkg.documentationUrl && (
+                      {pkg.release.documentationUrl && (
                         <a
-                          href={pkg.documentationUrl}
+                          href={pkg.release.documentationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
@@ -496,18 +442,18 @@ export default function VPMPage() {
       <Modal
         isOpen={!!selectedPackage}
         onClose={() => setSelectedPackage(null)}
-        title={displayedPackage?.displayName || displayedPackage?.name}
+        title={displayedPackage?.release.displayName || displayedPackage?.release.name}
       >
         {displayedPackage && (() => {
           const catConfig = categoryConfig[displayedPackage.category]
           const CatIcon = catConfig.icon
-          const hasVpmDeps = displayedPackage.vpmDependencies && Object.keys(displayedPackage.vpmDependencies).length > 0
-          const hasUnityDeps = displayedPackage.dependencies && Object.keys(displayedPackage.dependencies).length > 0
+          const hasVpmDeps = displayedPackage.release.vpmDependencies && Object.keys(displayedPackage.release.vpmDependencies).length > 0
+          const hasUnityDeps = displayedPackage.release.dependencies && Object.keys(displayedPackage.release.dependencies).length > 0
           return (
             <>
               {/* YouTube Embed */}
-              {displayedPackage.youtubeUrl && (() => {
-                const videoId = displayedPackage.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
+              {displayedPackage.release.youtubeUrl && (() => {
+                const videoId = displayedPackage.release.youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/)?.[1]
                 return videoId ? (
                   <div className="mb-4 rounded-lg overflow-hidden aspect-video bg-fd-muted">
                     <iframe
@@ -523,7 +469,7 @@ export default function VPMPage() {
 
               {/* Description */}
               <p className="text-fd-muted-foreground mb-4">
-                {displayedPackage.description || 'No description available.'}
+                {displayedPackage.release.description || 'No description available.'}
               </p>
 
               {/* Tags row */}
@@ -533,36 +479,36 @@ export default function VPMPage() {
                   {catConfig.label}
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-fd-muted text-fd-muted-foreground">
-                  v{displayedPackage.version}
+                  v{displayedPackage.release.version}
                 </span>
-                {displayedPackage.unity && (
+                {displayedPackage.release.unity && (
                   <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-fd-muted text-fd-muted-foreground">
-                    Unity {displayedPackage.unity}{displayedPackage.unityRelease && `f${displayedPackage.unityRelease}`}
+                    Unity {displayedPackage.release.unity}{displayedPackage.release.unityRelease && `f${displayedPackage.release.unityRelease}`}
                   </span>
                 )}
-                {displayedPackage.license && (
+                {displayedPackage.release.license && (
                   <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-fd-muted text-fd-muted-foreground">
                     <Scale size={12} />
-                    {displayedPackage.license}
+                    {displayedPackage.release.license}
                   </span>
                 )}
-                {displayedPackage.type && (
+                {displayedPackage.release.type && (
                   <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-fd-muted text-fd-muted-foreground">
                     <Layers size={12} />
-                    {displayedPackage.type}
+                    {displayedPackage.release.type}
                   </span>
                 )}
               </div>
 
               {/* Keywords */}
-              {displayedPackage.keywords && displayedPackage.keywords.length > 0 && (
+              {displayedPackage.release.keywords && displayedPackage.release.keywords.length > 0 && (
                 <div className="mb-4">
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1">
                     <Tag size={12} />
                     Keywords
                   </span>
                   <div className="flex flex-wrap gap-1.5">
-                    {displayedPackage.keywords.map((kw, i) => (
+                    {displayedPackage.release.keywords.map((kw, i) => (
                       <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-fd-secondary text-fd-muted-foreground border border-fd-border">
                         {kw}
                       </span>
@@ -577,44 +523,44 @@ export default function VPMPage() {
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><Package size={12} /> Package ID</span>
                   <p className="font-mono text-xs bg-fd-muted px-2 py-1 rounded truncate">{displayedPackage.name}</p>
                 </div>
-                {displayedPackage.author?.name && (
+                {displayedPackage.release.author?.name && (
                   <div>
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><User size={12} /> Author</span>
                     <p className="truncate">
-                      {displayedPackage.author.url ? (
+                      {displayedPackage.release.author.url ? (
                         <a
-                          href={displayedPackage.author.url}
+                          href={displayedPackage.release.author.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm"
                         >
-                          {displayedPackage.author.name}
+                          {displayedPackage.release.author.name}
                           <ExternalLink size={12} />
                         </a>
                       ) : (
-                        <span className="text-sm">{displayedPackage.author.name}</span>
+                        <span className="text-sm">{displayedPackage.release.author.name}</span>
                       )}
                     </p>
                   </div>
                 )}
-                {displayedPackage.author?.email && (
+                {displayedPackage.release.author?.email && (
                   <div>
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><Mail size={12} /> Contact</span>
                     <p className="truncate">
                       <a
-                        href={`mailto:${displayedPackage.author.email}`}
+                        href={`mailto:${displayedPackage.release.author.email}`}
                         className="hover:text-fd-primary hover:underline text-sm"
                       >
-                        {displayedPackage.author.email}
+                        {displayedPackage.release.author.email}
                       </a>
                     </p>
                   </div>
                 )}
-                {displayedPackage.contributors && displayedPackage.contributors.length > 0 && (
+                {displayedPackage.release.contributors && displayedPackage.release.contributors.length > 0 && (
                   <div className="col-span-2">
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><Users size={12} /> Contributors</span>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {displayedPackage.contributors.map((c, i) => (
+                      {displayedPackage.release.contributors.map((c, i) => (
                         c.url ? (
                           <a
                             key={i}
@@ -633,11 +579,11 @@ export default function VPMPage() {
                     </div>
                   </div>
                 )}
-                {displayedPackage.allVersions && displayedPackage.allVersions.length > 1 && (
+                {Object.keys(displayedPackage.versions).length > 1 && (
                   <div className="col-span-2">
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><History size={12} /> All versions</span>
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {displayedPackage.allVersions.map((v, i) => (
+                      {Object.values(displayedPackage.versions).map((v, i) => (
                         v.url ? (
                           <a
                             key={v.version}
@@ -661,14 +607,14 @@ export default function VPMPage() {
               </div>
 
               {/* Hash */}
-              {(displayedPackage.hash || displayedPackage.zipSHA256) && (
+              {(displayedPackage.release.hash || displayedPackage.release.zipSHA256) && (
                 <div className="mb-4">
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1">
                     <Hash size={12} />
                     Hashs
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries((displayedPackage.hash || { "sha256": displayedPackage.zipSHA256 })).map((hashType, i) => (
+                    {Object.entries((displayedPackage.release.hash || { "sha256": displayedPackage.release.zipSHA256 })).map((hashType, i) => (
                       <span key={i} className="px-2 py-0.5 rounded text-xs bg-fd-muted text-fd-muted-foreground font-mono truncate max-w-full">
                         {hashType[0].toUpperCase()}:{hashType[1]}
                       </span>
@@ -685,12 +631,12 @@ export default function VPMPage() {
                     Dependencies
                   </span>
                   <div className="flex flex-wrap gap-1.5">
-                    {hasVpmDeps && Object.entries(displayedPackage.vpmDependencies!).map(([dep, ver]) => (
+                    {hasVpmDeps && Object.entries(displayedPackage.release.vpmDependencies!).map(([dep, ver]) => (
                       <span key={dep} className="px-2 py-0.5 rounded text-xs bg-blue-500/10 text-blue-500 font-mono">
                         {dep} {ver}
                       </span>
                     ))}
-                    {hasUnityDeps && Object.entries(displayedPackage.dependencies!).map(([dep, ver]) => (
+                    {hasUnityDeps && Object.entries(displayedPackage.release.dependencies!).map(([dep, ver]) => (
                       <span key={dep} className="px-2 py-0.5 rounded text-xs bg-fd-muted text-fd-muted-foreground font-mono">
                         {dep} {ver}
                       </span>
@@ -700,14 +646,14 @@ export default function VPMPage() {
               )}
 
               {/* Samples */}
-              {displayedPackage.samples && displayedPackage.samples.length > 0 && (
+              {displayedPackage.release.samples && displayedPackage.release.samples.length > 0 && (
                 <div className="mb-4">
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1">
                     <FileBox size={12} />
                     Samples included
                   </span>
                   <div className="space-y-1">
-                    {displayedPackage.samples.map((sample, i) => (
+                    {displayedPackage.release.samples.map((sample, i) => (
                       <div key={i} className="text-sm px-2 py-1 bg-fd-muted rounded flex items-center gap-1.5 overflow-hidden">
                         <span className="font-medium shrink-0">{sample.displayName}</span>
                         {sample.description && (
@@ -732,9 +678,9 @@ export default function VPMPage() {
                   <Plus size={18} />
                   Add to VCC
                 </a>
-                {displayedPackage.url && (
+                {displayedPackage.release.url && (
                   <a
-                    href={displayedPackage.url}
+                    href={displayedPackage.release.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
@@ -743,9 +689,9 @@ export default function VPMPage() {
                     <Download size={18} />
                   </a>
                 )}
-                {displayedPackage.documentationUrl && (
+                {displayedPackage.release.documentationUrl && (
                   <a
-                    href={displayedPackage.documentationUrl}
+                    href={displayedPackage.release.documentationUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
@@ -754,9 +700,9 @@ export default function VPMPage() {
                     <BookOpen size={18} />
                   </a>
                 )}
-                {displayedPackage.licensesUrl && (
+                {displayedPackage.release.licensesUrl && (
                   <a
-                    href={displayedPackage.licensesUrl}
+                    href={displayedPackage.release.licensesUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
@@ -776,9 +722,9 @@ export default function VPMPage() {
                     <Github size={18} />
                   </a>
                 )}
-                {displayedPackage.changelogUrl && (
+                {displayedPackage.release.changelogUrl && (
                   <a
-                    href={displayedPackage.changelogUrl}
+                    href={displayedPackage.release.changelogUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
