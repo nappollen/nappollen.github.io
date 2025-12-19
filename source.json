@@ -14,7 +14,8 @@
         "githubRepos": [
             "nappollen/packager",
             "nappollen/udon-inspector",
-            "nappollen/udon.daysync"
+            "nappollen/udon.daysync",
+            "nappollen/udon.activity"
         ]
     },
     "links": {
