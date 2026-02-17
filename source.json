@@ -15,7 +15,8 @@
             "nappollen/packager",
             "nappollen/udon-inspector",
             "nappollen/udon.daysync",
-            "nappollen/udon.activity"
+            "nappollen/udon.activity",
+            "nappollen/udon-poster"
         ]
     },
     "links": {
