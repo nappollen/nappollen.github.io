@@ -680,11 +680,23 @@ export default function VPMPage() {
                         const linkClass = `hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : ''}`
                         const label = <>{v.version}{i === 0 && ' (latest)'}<Download size={12} /></>
                         if (v.url && v.unitypackageUrl) {
-                          return (
+                          const trigger = <a href="#" onClick={e => e.preventDefault()} className={linkClass}>{label}</a>
+                          return isMobile ? (
+                            <Drawer key={v.version}>
+                              <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+                              <DrawerContent>
+                                <DrawerHeader>
+                                  <DrawerTitle>{v.version}</DrawerTitle>
+                                </DrawerHeader>
+                                <div className="flex flex-col gap-1 p-4 pt-0 text-sm font-medium">
+                                  <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><UnityIcon size={14} /> Unity Package</a>
+                                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><Archive size={14} /> ZIP</a>
+                                </div>
+                              </DrawerContent>
+                            </Drawer>
+                          ) : (
                             <DropdownMenu key={v.version}>
-                              <DropdownMenuTrigger asChild>
-                                <a href="#" onClick={e => e.preventDefault()} className={linkClass}>{label}</a>
-                              </DropdownMenuTrigger>
+                              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
                               <DropdownMenuContent side="top" align="start">
                                 <DropdownMenuItem asChild>
                                   <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -804,10 +816,10 @@ export default function VPMPage() {
 
                 const dlBtns = [
                   displayedPackage.release.unitypackageUrl
-                    ? <DownloadButton key="unity" href={displayedPackage.release.unitypackageUrl} icon={UnityIcon} title="Download .unitypackage" />
+                    ? <DownloadButton key="unity" href={displayedPackage.release.unitypackageUrl} icon={UnityIcon} title="Download Unity package" />
                     : null,
                   displayedPackage.release.url
-                    ? <DownloadButton key="zip" href={displayedPackage.release.url} icon={Archive} title="Download ZIP" />
+                    ? <DownloadButton key="zip" href={displayedPackage.release.url} icon={Archive} title="Download archive ZIP" />
                     : null,
                 ].filter(Boolean)
 
