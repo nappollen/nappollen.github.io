@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Package, Copy, Check, Search, Plus, ExternalLink, Info, Loader2, Globe, User, Wrench, Download, Scale, Boxes, History, Hash, Mail, Github, Users, Tag, FileBox, FileText, BookOpen, FileKey, Layers, ArrowUpRight } from 'lucide-react'
 import { GlobeAltIcon as GlobeAltIconSolid, UserIcon as UserIconSolid, WrenchScrewdriverIcon as WrenchScrewdriverIconSolid } from '@heroicons/react/24/solid'
 import { Modal } from '@/components/Modal'
@@ -112,6 +113,24 @@ export default function VPMPage() {
   const [displayedPackage, setDisplayedPackage] = useState<PackageInfos | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<PackageCategory | 'all'>('all')
   const [primaryColor, setPrimaryColor] = useState('#888888')
+  const router = useRouter()
+
+  const updateParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(window.location.search)
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === null) params.delete(key)
+      else params.set(key, value)
+    }
+    const qs = params.toString()
+    router.replace(`/vpm${qs ? '?' + qs : ''}`, { scroll: false })
+  }
+
+  // Read initial query params after mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const f = params.get('f') as PackageCategory | null
+    if (f && ['world', 'avatar', 'tool'].includes(f)) setCategoryFilter(f)
+  }, [])
 
   // Get primary color from CSS variable
   useEffect(() => {
@@ -184,6 +203,14 @@ export default function VPMPage() {
     loadPackages()
   }, [])
 
+  // Open modal from ?v= param after packages load
+  useEffect(() => {
+    if (loading) return
+    const params = new URLSearchParams(window.location.search)
+    const v = params.get('v')
+    if (v && vpm.packages[v]) setSelectedPackage(vpm.packages[v])
+  }, [loading])
+
   const filteredPackages = Object.values(vpm.packages).filter(
     (pkg) =>
       pkg.name &&
@@ -228,7 +255,7 @@ export default function VPMPage() {
         footer={<>
           <button
             onClick={() => setShowHelp(true)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm border border-fd-border/50 rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
           >
             <Info size={16} />
             How to install?
@@ -238,7 +265,7 @@ export default function VPMPage() {
               href={config.infoLink.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm border border-fd-border/50 rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
             >
               <Github size={16} />
               {config.infoLink.text}
@@ -294,7 +321,7 @@ export default function VPMPage() {
           {/* Category Filter */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <button
-              onClick={() => setCategoryFilter('all')}
+              onClick={() => { setCategoryFilter('all'); updateParams({ f: null }) }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${categoryFilter === 'all'
                 ? 'bg-fd-primary text-fd-primary-foreground'
                 : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
@@ -311,7 +338,7 @@ export default function VPMPage() {
                 return (
                   <button
                     key={cat}
-                    onClick={() => setCategoryFilter(cat)}
+                    onClick={() => { setCategoryFilter(cat); updateParams({ f: cat }) }}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${categoryFilter === cat
                       ? 'bg-fd-primary text-fd-primary-foreground'
                       : 'bg-fd-secondary border border-fd-border hover:bg-fd-accent'
@@ -422,7 +449,7 @@ export default function VPMPage() {
                         Add to VCC
                       </a>
                       <button
-                        onClick={() => setSelectedPackage(pkg)}
+                        onClick={() => { setSelectedPackage(pkg); updateParams({ v: pkg.name }) }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
                       >
                         <Info size={16} />
@@ -439,7 +466,7 @@ export default function VPMPage() {
       {/* Details Modal */}
       <Modal
         isOpen={!!selectedPackage}
-        onClose={() => setSelectedPackage(null)}
+        onClose={() => { setSelectedPackage(null); updateParams({ v: null }) }}
         title={displayedPackage?.release.displayName || displayedPackage?.release.name}
       >
         {displayedPackage && (() => {
