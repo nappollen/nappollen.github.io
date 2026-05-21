@@ -291,7 +291,16 @@ export default function FaultyTerminal({
     const ctn = containerRef.current;
     if (!ctn) return;
 
-    const renderer = new Renderer({ dpr });
+    let renderer: Renderer;
+
+    try {
+      renderer = new Renderer({ dpr });
+    if (!renderer.gl) // context creation silently failed 
+      throw new Error('WebGL not supported');
+    } catch {
+      return; // WebGL unavailable, degrade gracefully
+    }
+
     rendererRef.current = renderer;
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 1);
