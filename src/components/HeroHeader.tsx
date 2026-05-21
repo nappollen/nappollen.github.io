@@ -37,7 +37,7 @@ export function HeroHeader({
     customBackground,
 }: HeroHeaderProps) {
     return (
-        <section className="min-h-[50vh] flex flex-col justify-center items-center relative border-b border-fd-border bg-fd-background overflow-hidden pb-16">
+        <section className="min-h-[50vh] flex flex-col justify-center items-center relative border-b border-fd-border bg-fd-background overflow-hidden pb-16 rounded-b-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.12)]">
             {customBackground && (
                 <div className="absolute inset-0 w-full h-full pointer-events-none">
                     {customBackground}
@@ -51,11 +51,17 @@ export function HeroHeader({
                     </div>
                 )}
 
-                <h1 className="text-4xl font-bold mb-4">{title}</h1>
+                <h1 className="text-4xl font-bold mb-4">
+                    <span className="bg-fd-background/85 backdrop-blur-sm px-4 py-2 rounded-xl inline-block">
+                        {title}
+                    </span>
+                </h1>
 
                 {description && (
                     <p className="text-fd-muted-foreground text-lg mb-8 max-w-xl mx-auto">
-                        {description}
+                        <span className="bg-fd-background/85 backdrop-blur-sm px-3 py-1 rounded-lg inline-block">
+                            {description}
+                        </span>
                     </p>
                 )}
 

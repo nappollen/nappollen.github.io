@@ -228,7 +228,7 @@ export default function VPMPage() {
         footer={<>
           <button
             onClick={() => setShowHelp(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm border border-fd-border/50 rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
           >
             <Info size={16} />
             How to install?
@@ -238,7 +238,7 @@ export default function VPMPage() {
               href={config.infoLink.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-fd-background/85 backdrop-blur-sm border border-fd-border/50 rounded-lg text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
             >
               <Github size={16} />
               {config.infoLink.text}

@@ -22,6 +22,7 @@ export interface FaultyTerminalProps extends React.HTMLAttributes<HTMLDivElement
   dpr?: number;
   pageLoadAnimation?: boolean;
   brightness?: number;
+  transparent?: boolean;
 }
 
 const vertexShader = `
@@ -59,6 +60,7 @@ uniform float uUseMouse;
 uniform float uPageLoadProgress;
 uniform float uUsePageLoadAnimation;
 uniform float uBrightness;
+uniform float uTransparent;
 
 float time;
 
@@ -226,7 +228,10 @@ void main() {
       col += (rnd - 0.5) * (uDither * 0.003922);
     }
 
-    gl_FragColor = vec4(col, 1.0);
+    float alpha = uTransparent > 0.5
+      ? clamp(dot(col, vec3(0.299, 0.587, 0.114)) / max(uBrightness, 0.001), 0.0, 1.0)
+      : 1.0;
+    gl_FragColor = vec4(col, alpha);
 }
 `;
 
@@ -260,6 +265,7 @@ export default function FaultyTerminal({
   dpr = Math.min(window.devicePixelRatio || 1, 2),
   pageLoadAnimation = true,
   brightness = 1,
+  transparent = false,
   className,
   style,
   ...rest
@@ -294,16 +300,16 @@ export default function FaultyTerminal({
     let renderer: Renderer;
 
     try {
-      renderer = new Renderer({ dpr });
-    if (!renderer.gl) // context creation silently failed 
-      throw new Error('WebGL not supported');
+      renderer = new Renderer({ dpr, alpha: transparent });
+      if (!renderer.gl) throw new Error('WebGL not supported');
     } catch {
       return; // WebGL unavailable, degrade gracefully
     }
 
     rendererRef.current = renderer;
     const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 1);
+    if (transparent) gl.clearColor(0, 0, 0, 0);
+    else gl.clearColor(0, 0, 0, 1);
 
     const geometry = new Triangle(gl);
 
@@ -334,7 +340,8 @@ export default function FaultyTerminal({
         uUseMouse: { value: mouseReact ? 1 : 0 },
         uPageLoadProgress: { value: pageLoadAnimation ? 0 : 1 },
         uUsePageLoadAnimation: { value: pageLoadAnimation ? 1 : 0 },
-        uBrightness: { value: brightness }
+        uBrightness: { value: brightness },
+        uTransparent: { value: transparent ? 1 : 0 }
       }
     });
     programRef.current = program;
@@ -424,6 +431,7 @@ export default function FaultyTerminal({
     mouseStrength,
     pageLoadAnimation,
     brightness,
+    transparent,
     handleMouseMove
   ]);
 

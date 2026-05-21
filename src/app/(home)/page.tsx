@@ -14,10 +14,13 @@ const FaultyTerminal = dynamic(() => import('@/components/FaultyTerminal'), {
 
 export default function HomePage() {
   const [primaryColor, setPrimaryColor] = useState('#888888')
+  const [isDark, setIsDark] = useState(true)
 
-  // Get primary color from CSS variable
+  // Get primary color from CSS variable and track dark/light mode
   useEffect(() => {
     const updateColor = () => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+
       const style = getComputedStyle(document.documentElement)
       const fdPrimary = style.getPropertyValue('--fd-primary').trim()
       if (fdPrimary) {
@@ -70,7 +73,8 @@ export default function HomePage() {
           curvature={0.1}
           tint={primaryColor}
           mouseStrength={0.3}
-          brightness={0.4}
+          brightness={isDark ? 0.4 : 0.7}
+          transparent={true}
           pageLoadAnimation={false}
         />}
       >
