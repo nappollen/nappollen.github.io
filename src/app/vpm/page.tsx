@@ -251,12 +251,20 @@ export default function VPMPage() {
     loadPackages()
   }, [])
 
+  const pkgUrl = (id: string) => {
+    const f = categoryFilter !== 'all' ? '?f=' + categoryFilter : ''
+    return '/vpm/' + id + '/' + f
+  }
+
   // Open modal from ?v= param after packages load
   useEffect(() => {
     if (loading) return
     const params = new URLSearchParams(window.location.search)
     const v = params.get('v')
-    if (v && vpm.packages[v]) setSelectedPackage(vpm.packages[v])
+    if (v && vpm.packages[v]) {
+      setSelectedPackage(vpm.packages[v])
+      window.history.replaceState(null, '', pkgUrl(v))
+    }
   }, [loading])
 
   const filteredPackages = Object.values(vpm.packages).filter(
@@ -497,7 +505,7 @@ export default function VPMPage() {
                         Add to VCC
                       </a>
                       <button
-                        onClick={() => { setSelectedPackage(pkg); updateParams({ v: pkg.name }) }}
+                        onClick={() => { setSelectedPackage(pkg); window.history.replaceState(null, '', pkgUrl(pkg.name)) }}
                         className="inline-flex items-center gap-1.5 px-3 py-2 text-fd-muted-foreground hover:text-fd-primary transition-colors text-sm"
                       >
                         <Info size={16} />
@@ -514,7 +522,7 @@ export default function VPMPage() {
       {/* Details Modal */}
       <Modal
         isOpen={!!selectedPackage}
-        onClose={() => { setSelectedPackage(null); updateParams({ v: null }) }}
+        onClose={() => { setSelectedPackage(null); window.history.replaceState(null, '', '/vpm/' + (categoryFilter !== 'all' ? '?f=' + categoryFilter : '')) }}
         title={displayedPackage?.release.displayName || displayedPackage?.release.name}
       >
         {displayedPackage && (() => {
@@ -680,7 +688,15 @@ export default function VPMPage() {
                         const linkClass = `hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : ''}`
                         const label = <>{v.version}{i === 0 && ' (latest)'}<Download size={12} /></>
                         if (v.url && v.unitypackageUrl) {
-                          const trigger = <button type="button" className={linkClass}>{label}</button>
+                          const trigger = (
+                            <a
+                              href={v.url}
+                              onClick={e => e.preventDefault()}
+                              className={linkClass + ' cursor-pointer'}
+                            >
+                              {label}
+                            </a>
+                          )
                           return isMobile ? (
                             <Drawer key={v.version}>
                               <DrawerTrigger asChild>{trigger}</DrawerTrigger>
@@ -888,7 +904,7 @@ export default function VPMPage() {
                   <div className="flex gap-2 mt-6 pt-4 border-t border-fd-border">
                     <a
                       href={displayedPackage.listingUrl ? `vcc://vpm/addRepo?url=${encodeURIComponent(displayedPackage.listingUrl)}` : vccUrl}
-                      onClick={() => setSelectedPackage(null)}
+                      onClick={() => { setSelectedPackage(null); window.history.replaceState(null, '', '/vpm/' + (categoryFilter !== 'all' ? '?f=' + categoryFilter : '')) }}
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-primary text-fd-primary-foreground rounded-lg font-medium hover:bg-fd-primary/80 transition-colors"
                     >
                       <Plus size={18} />
