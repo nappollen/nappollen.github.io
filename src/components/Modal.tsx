@@ -64,7 +64,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'lg' }: Mod
       onClick={onClose}
     >
       <div
-        className={`bg-fd-background border border-fd-border rounded-xl w-full ${maxWidthClasses[maxWidth]} p-6 shadow-xl transition-all duration-200 ${
+        className={`bg-fd-background border border-fd-border rounded-xl w-full ${maxWidthClasses[maxWidth]} shadow-xl transition-all duration-200 flex flex-col max-h-[90vh] ${
           isAnimating 
             ? 'opacity-100 scale-100 translate-y-0' 
             : 'opacity-0 scale-95 translate-y-4'
@@ -72,7 +72,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'lg' }: Mod
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between p-6 pb-4 shrink-0">
             <h2 className="text-xl font-bold">{title}</h2>
             <button
               onClick={onClose}
@@ -92,7 +92,9 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'lg' }: Mod
             <X size={20} />
           </button>
         )}
-        {children}
+        <div className="overflow-y-auto px-6 pb-6 flex-1">
+          {children}
+        </div>
       </div>
     </div>
   )
