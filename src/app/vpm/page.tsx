@@ -680,7 +680,7 @@ export default function VPMPage() {
                         const linkClass = `hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : ''}`
                         const label = <>{v.version}{i === 0 && ' (latest)'}<Download size={12} /></>
                         if (v.url && v.unitypackageUrl) {
-                          const trigger = <a href="#" onClick={e => e.preventDefault()} className={linkClass}>{label}</a>
+                          const trigger = <button type="button" className={linkClass}>{label}</button>
                           return isMobile ? (
                             <Drawer key={v.version}>
                               <DrawerTrigger asChild>{trigger}</DrawerTrigger>
@@ -689,8 +689,8 @@ export default function VPMPage() {
                                   <DrawerTitle>{v.version}</DrawerTitle>
                                 </DrawerHeader>
                                 <div className="flex flex-col gap-1 p-4 pt-0 text-sm font-medium">
-                                  <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><UnityIcon size={14} /> Unity Package</a>
-                                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><Archive size={14} /> ZIP</a>
+                                  <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><UnityIcon size={14} /> Unity package</a>
+                                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><Archive size={14} /> Archive ZIP</a>
                                 </div>
                               </DrawerContent>
                             </Drawer>
@@ -700,12 +700,12 @@ export default function VPMPage() {
                               <DropdownMenuContent side="top" align="start">
                                 <DropdownMenuItem asChild>
                                   <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                    <UnityIcon size={14} /> Unity Package
+                                    <UnityIcon size={14} /> Unity package
                                   </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                   <a href={v.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                    <Archive size={14} /> ZIP
+                                    <Archive size={14} /> Archive ZIP
                                   </a>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
