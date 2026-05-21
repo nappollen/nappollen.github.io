@@ -13,6 +13,7 @@
         },
         "githubRepos": [
             "nappollen/packager",
+            "nappollen/nappollen.antidrift",
             "nappollen/udon-inspector",
             "nappollen/udon.daysync",
             "nappollen/udon.activity",
