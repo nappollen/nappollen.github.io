@@ -310,6 +310,46 @@
           "url": "https://github.com/example/common-lib/releases/download/1.0.0/com.example.common-lib-1.0.0.zip"
         }
       }
+    },
+    "com.example.test-package": {
+      "listingUrl": "https://example.github.io/vpm/com.example.test-package.json",
+      "url": "https://github.com/example/test-package",
+      "description": "Test package to verify listingUrl, manifest and unitypackage display.",
+      "versions": {
+        "1.0.0": {
+          "name": "com.example.test-package",
+          "displayName": "Test Package",
+          "version": "1.0.0",
+          "unity": "2022.3",
+          "unityRelease": "22f1",
+          "description": "Test package to verify listingUrl, manifest and unitypackage display.",
+          "type": "tool",
+          "license": "MIT",
+          "keywords": ["test", "example", "vpm"],
+          "author": {
+            "name": "Author Name",
+            "email": "contact@example.com",
+            "url": "https://github.com/example"
+          },
+          "vpmDependencies": {
+            "com.vrchat.worlds": "^3.8.x"
+          },
+          "bannerUrl": "https://picsum.photos/seed/testpkg/1920/1080",
+          "documentationUrl": "https://docs.example.com/test-package",
+          "changelogUrl": "https://github.com/example/test-package/blob/main/CHANGELOG.md",
+          "licensesUrl": "https://github.com/example/test-package/blob/main/LICENSE",
+          "manifestUrl": "https://github.com/example/test-package/releases/download/1.0.0/package.json",
+          "unitypackageUrl": "https://github.com/example/test-package/releases/download/1.0.0/com.example.test-package-1.0.0.unitypackage",
+          "zipSHA256": "aaabbbccc0123456789abcdef0123456789abcdef0123456789abcdef012345",
+          "hash": {
+            "md5": "d41d8cd98f00b204e9800998ecf8427e",
+            "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "sha256": "aaabbbccc0123456789abcdef0123456789abcdef0123456789abcdef012345",
+            "sha512": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+          },
+          "url": "https://github.com/example/test-package/releases/download/1.0.0/com.example.test-package-1.0.0.zip"
+        }
+      }
     }
   }
 }
