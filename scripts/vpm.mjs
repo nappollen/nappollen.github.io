@@ -173,6 +173,20 @@ function findZipAsset(release) {
 }
 
 /**
+ * Find .unitypackage asset in a release
+ */
+function findUnityPackageAsset(release) {
+  return release.assets?.find(a => a.name.endsWith('.unitypackage'));
+}
+
+/**
+ * Find MANIFEST.txt asset in a release
+ */
+function findManifestAsset(release) {
+  return release.assets?.find(a => a.name.toLowerCase() === 'manifest.txt');
+}
+
+/**
  * Fetch package.json content from release asset
  */
 async function fetchPackageJson(asset) {
@@ -222,6 +236,8 @@ async function buildPackages() {
 
       const packageJsonAsset = findPackageJson(release);
       const zipAsset = findZipAsset(release);
+      const unityPackageAsset = findUnityPackageAsset(release);
+      const manifestAsset = findManifestAsset(release);
 
       if (!zipAsset) {
         console.log(`  Skipping ${release.tag_name}: no zip asset`);
@@ -270,13 +286,15 @@ async function buildPackages() {
       packages[packageName].versions[version] = {
         ...packageData,
         url: zipAsset.browser_download_url,
+        ...(unityPackageAsset && { unitypackageUrl: unityPackageAsset.browser_download_url }),
+        ...(manifestAsset && { manifestUrl: manifestAsset.browser_download_url }),
         ...(hashes && { 
           zipSHA256: hashes.sha256,
           hash: hashes 
         })
       };
 
-      console.log(`  Added ${packageName}@${version}${hashes ? ' (hashed)' : ''}`);
+      console.log(`  Added ${packageName}@${version}${hashes ? ' (hashed)' : ''}${unityPackageAsset ? ' +unitypackage' : ''}${manifestAsset ? ' +manifest' : ''}`);
     }
 
     // Add GitHub repo info to package level
@@ -358,8 +376,8 @@ async function build() {
     packages
   };
 
-  // Output directory
-  const outDir = join(ROOT, 'out');
+  // Output directory (public/ so Next.js picks it up at build time for SSG)
+  const outDir = join(ROOT, 'public');
   mkdirSync(outDir, { recursive: true });
 
   // Write main vpm.json
