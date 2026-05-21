@@ -8,12 +8,27 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
+const siteUrl = new URL((sourceConfig.vpm as { url: string }).url).origin;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: sourceConfig.title || '',
     template: `%s • ${sourceConfig.title || ''}`,
   },
   description: sourceConfig.description || '',
+  openGraph: {
+    siteName: sourceConfig.title,
+    type: 'website',
+    url: siteUrl,
+    title: sourceConfig.title,
+    description: sourceConfig.description,
+  },
+  twitter: {
+    card: 'summary',
+    title: sourceConfig.title,
+    description: sourceConfig.description,
+  },
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
