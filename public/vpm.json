@@ -61,6 +61,7 @@
           "changelogUrl": "https://github.com/example/world-toolkit/blob/main/CHANGELOG.md",
           "youtubeUrl": "https://www.youtube.com/watch?v=FtutLA63Cp8",
           "licensesUrl": "https://github.com/example/world-toolkit/blob/main/LICENSE",
+          "unitypackageUrl": "https://github.com/example/world-toolkit/releases/download/2.1.0/com.example.world-toolkit-2.1.0.unitypackage",
           "zipSHA256": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
           "url": "https://github.com/example/world-toolkit/releases/download/2.1.0/com.example.world-toolkit-2.1.0.zip"
         },
@@ -78,6 +79,7 @@
             "name": "Author Name",
             "url": "https://github.com/example"
           },
+          "unitypackageUrl": "https://github.com/example/world-toolkit/releases/download/2.0.0/com.example.world-toolkit-2.0.0.unitypackage",
           "zipSHA256": "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567a",
           "url": "https://github.com/example/world-toolkit/releases/download/2.0.0/com.example.world-toolkit-2.0.0.zip"
         }
@@ -116,6 +118,7 @@
             "url": "https://github.com/example"
           },
           "changelogUrl": "https://github.com/example/avatar-utils/blob/main/CHANGELOG.md",
+          "unitypackageUrl": "https://github.com/example/avatar-utils/releases/download/1.5.2/com.example.avatar-utils-1.5.2.unitypackage",
           "zipSHA256": "c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2",
           "url": "https://github.com/example/avatar-utils/releases/download/1.5.2/com.example.avatar-utils-1.5.2.zip"
         }
@@ -159,6 +162,7 @@
             }
           ],
           "documentationUrl": "https://docs.example.com/shaders",
+          "unitypackageUrl": "https://github.com/example/shader-pack/releases/download/3.0.0/com.example.shader-pack-3.0.0.unitypackage",
           "zipSHA256": "d4e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3",
           "url": "https://github.com/example/shader-pack/releases/download/3.0.0/com.example.shader-pack-3.0.0.zip"
         }
@@ -202,8 +206,9 @@
             "sha256": "69755200c5ce18380fa286f0864dfda2bac01236e9baffef5e98614e2cea25a0",
             "sha512": "6cd88b4ab687e7457c5ab904a8258068168d7ec6eae041efe59992d9a6b15e8dfa0a3855cbaa41e3273bb0dd9d265241a5478fc81714a1639b639c4d816bbd7f"
           },
+          "unitypackageUrl": "https://github.com/example/debug-console/releases/download/0.8.0/com.example.debug-console-0.8.0.unitypackage",
           "zipSHA256": "e5f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3d4",
-          "url": "https://github.com/example/debug-console"
+          "url": "https://github.com/example/debug-console/releases/download/0.8.0/com.example.debug-console-0.8.0.zip"
         }
       }
     },
@@ -250,6 +255,7 @@
             "url": "https://github.com/example"
           },
           "changelogUrl": "https://github.com/example/audio-system/blob/main/CHANGELOG.md",
+          "unitypackageUrl": "https://github.com/example/audio-system/releases/download/1.2.0/com.example.audio-system-1.2.0.unitypackage",
           "zipSHA256": "f6789012345678901234567890abcdef1234567890abcdef1234567ab2c3d4e5",
           "url": "https://github.com/example/audio-system/releases/download/1.2.0/com.example.audio-system-1.2.0.zip"
         },
@@ -266,6 +272,7 @@
           "author": {
             "name": "Author Name"
           },
+          "unitypackageUrl": "https://github.com/example/audio-system/releases/download/1.1.0/com.example.audio-system-1.1.0.unitypackage",
           "url": "https://github.com/example/audio-system/releases/download/1.1.0/com.example.audio-system-1.1.0.zip"
         },
         "1.0.0": {
@@ -281,6 +288,7 @@
           "author": {
             "name": "Author Name"
           },
+          "unitypackageUrl": "https://github.com/example/audio-system/releases/download/1.0.0/com.example.audio-system-1.0.0.unitypackage",
           "url": "https://github.com/example/audio-system/releases/download/1.0.0/com.example.audio-system-1.0.0.zip"
         }
       }
@@ -306,6 +314,7 @@
             "name": "Author Name",
             "url": "https://github.com/example"
           },
+          "unitypackageUrl": "https://github.com/example/common-lib/releases/download/1.0.0/com.example.common-lib-1.0.0.unitypackage",
           "zipSHA256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
           "url": "https://github.com/example/common-lib/releases/download/1.0.0/com.example.common-lib-1.0.0.zip"
         }

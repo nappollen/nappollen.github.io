@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import type { Metadata } from 'next'
-import PackageRedirect from './PackageRedirect'
+import VPMPage from '@/app/vpm/page'
 import sourceConfig from '@/../source.json'
 
 interface PackageVersion {
@@ -9,6 +9,7 @@ interface PackageVersion {
   description?: string
   bannerUrl?: string
   version?: string
+  vpmDependencies?: { [key: string]: string }
 }
 
 interface VPMData {
@@ -19,6 +20,20 @@ interface VPMData {
       versions: { [v: string]: PackageVersion }
     }
   }
+}
+
+function detectCategory(vpmDependencies?: { [key: string]: string }): 'world' | 'avatar' | 'tool' {
+  if (!vpmDependencies) return 'tool'
+  const deps = Object.keys(vpmDependencies)
+  if (deps.some(d => d.includes('avatars'))) return 'avatar'
+  if (deps.some(d => d.includes('worlds') || d.includes('udonsharp'))) return 'world'
+  return 'tool'
+}
+
+const categoryColor: Record<string, string> = {
+  world: '#3b82f6',
+  avatar: '#a855f7',
+  tool: '#22c55e',
 }
 
 function readVPMData(): VPMData {
@@ -56,10 +71,13 @@ export async function generateMetadata(
   const title = release.displayName || packageId
   const description = release.description || pkg.description || vpm.description
   const image = release.bannerUrl
+  const category = detectCategory(release.vpmDependencies)
+  const color = categoryColor[category]
 
   return {
     title,
     description,
+    themeColor: color,
     openGraph: {
       title: `${title} • ${vpm.name}`,
       description,
@@ -78,5 +96,5 @@ export async function generateMetadata(
 
 export default async function PackagePage(props: { params: Promise<{ packageId: string }> }) {
   const { packageId } = await props.params
-  return <PackageRedirect packageId={packageId} />
+  return <VPMPage initialPackageId={packageId} />
 }

@@ -148,7 +148,7 @@ const UnityIcon = ({ size = 12 }: { size?: number }) => (
   </svg>
 )
 
-export default function VPMPage() {
+export default function VPMPage({ initialPackageId }: { initialPackageId?: string } = {}) {
   const isMobile = useIsMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [copied, setCopied] = useState(false)
@@ -161,6 +161,7 @@ export default function VPMPage() {
   const [displayedPackage, setDisplayedPackage] = useState<PackageInfos | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<PackageCategory | 'all'>('all')
   const [primaryColor, setPrimaryColor] = useState('#888888')
+  const [versionDrawer, setVersionDrawer] = useState<PackageVersion | null>(null)
   const router = useRouter()
 
   const updateParams = (updates: Record<string, string | null>) => {
@@ -256,16 +257,12 @@ export default function VPMPage() {
     return '/vpm/' + id + '/' + f
   }
 
-  // Open modal from ?v= param after packages load
+  // Open modal for initialPackageId (when rendered from /vpm/[packageId]/ route)
   useEffect(() => {
-    if (loading) return
-    const params = new URLSearchParams(window.location.search)
-    const v = params.get('v')
-    if (v && vpm.packages[v]) {
-      setSelectedPackage(vpm.packages[v])
-      window.history.replaceState(null, '', pkgUrl(v))
-    }
-  }, [loading])
+    if (loading || !initialPackageId) return
+    const pkg = vpm.packages[initialPackageId]
+    if (pkg) setSelectedPackage(pkg)
+  }, [loading, initialPackageId])
 
   const filteredPackages = Object.values(vpm.packages).filter(
     (pkg) =>
@@ -690,29 +687,25 @@ export default function VPMPage() {
                         if (v.url && v.unitypackageUrl) {
                           const trigger = (
                             <a
+                              key={v.version}
                               href={v.url}
-                              onClick={e => e.preventDefault()}
+                              onClick={e => { e.preventDefault(); isMobile ? setVersionDrawer(v) : undefined }}
                               className={linkClass + ' cursor-pointer'}
                             >
                               {label}
                             </a>
                           )
-                          return isMobile ? (
-                            <Drawer key={v.version}>
-                              <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-                              <DrawerContent>
-                                <DrawerHeader>
-                                  <DrawerTitle>{v.version}</DrawerTitle>
-                                </DrawerHeader>
-                                <div className="flex flex-col gap-1 p-4 pt-0 text-sm font-medium">
-                                  <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><UnityIcon size={14} /> Unity package</a>
-                                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors"><Archive size={14} /> Archive ZIP</a>
-                                </div>
-                              </DrawerContent>
-                            </Drawer>
-                          ) : (
+                          return isMobile ? trigger : (
                             <DropdownMenu key={v.version}>
-                              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                              <DropdownMenuTrigger asChild>
+                                <a
+                                  href={v.url}
+                                  onClick={e => e.preventDefault()}
+                                  className={linkClass + ' cursor-pointer'}
+                                >
+                                  {label}
+                                </a>
+                              </DropdownMenuTrigger>
                               <DropdownMenuContent side="top" align="start">
                                 <DropdownMenuItem asChild>
                                   <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
@@ -813,6 +806,27 @@ export default function VPMPage() {
                   </div>
                 </div>
               )}
+
+              {/* Version drawer (mobile) */}
+              <Drawer open={!!versionDrawer} onOpenChange={open => !open && setVersionDrawer(null)}>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>{versionDrawer?.version}</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="flex flex-col gap-1 p-4 pt-0 text-sm font-medium">
+                    {versionDrawer?.unitypackageUrl && (
+                      <a href={versionDrawer.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors" onClick={() => setVersionDrawer(null)}>
+                        <UnityIcon size={14} /> Unity package
+                      </a>
+                    )}
+                    {versionDrawer?.url && (
+                      <a href={versionDrawer.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors" onClick={() => setVersionDrawer(null)}>
+                        <Archive size={14} /> Archive ZIP
+                      </a>
+                    )}
+                  </div>
+                </DrawerContent>
+              </Drawer>
 
               {/* Actions */}
               {(() => {
