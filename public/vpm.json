@@ -5,6 +5,7 @@
   "id": "com.example.vpm",
   "packages": {
     "com.example.world-toolkit": {
+      "listingUrl": "/vpm/com.example.world-toolkit.json",
       "versions": {
         "2.1.0": {
           "name": "com.example.world-toolkit",
@@ -83,6 +84,7 @@
       }
     },
     "com.example.avatar-utils": {
+      "listingUrl": "/vpm/com.example.avatar-utils.json",
       "versions": {
         "1.5.2": {
           "name": "com.example.avatar-utils",
@@ -120,6 +122,7 @@
       }
     },
     "com.example.shader-pack": {
+      "listingUrl": "/vpm/com.example.shader-pack.json",
       "versions": {
         "3.0.0": {
           "name": "com.example.shader-pack",
@@ -164,6 +167,7 @@
     "com.example.debug-console": {
       "name": "com.example.debug-console",
       "url": "https://github.com/example/debug-console",
+      "listingUrl": "/vpm/com.example.debug-console.json",
       "versions": {
         "0.8.0": {
           "name": "com.example.debug-console",
@@ -204,6 +208,7 @@
       }
     },
     "com.example.audio-system": {
+      "listingUrl": "/vpm/com.example.audio-system.json",
       "versions": {
         "1.2.0": {
           "name": "com.example.audio-system",
@@ -281,6 +286,7 @@
       }
     },
     "com.example.common-lib": {
+      "listingUrl": "/vpm/com.example.common-lib.json",
       "versions": {
         "1.0.0": {
           "name": "com.example.common-lib",

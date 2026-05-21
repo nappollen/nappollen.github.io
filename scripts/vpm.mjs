@@ -339,6 +339,17 @@ async function build() {
 
   const packages = await buildPackages();
 
+  // Derive base URL for per-package listings
+  // e.g. "https://nappollen.github.io/vpm.json" → "https://nappollen.github.io/vpm/"
+  const mainUrl = vpmConfig.url;
+  const urlBase = mainUrl.substring(0, mainUrl.lastIndexOf('/') + 1);
+  const packageBaseUrl = urlBase + 'vpm/';
+
+  // Attach listingUrl to each package so the frontend can build per-package VCC links
+  for (const [packageName, pkg] of Object.entries(packages)) {
+    pkg.listingUrl = packageBaseUrl + packageName + '.json';
+  }
+
   const index = {
     name: vpmConfig.name,
     id: vpmConfig.id,
@@ -351,12 +362,29 @@ async function build() {
   const outDir = join(ROOT, 'out');
   mkdirSync(outDir, { recursive: true });
 
-  // Write vpm.json
+  // Write main vpm.json
   const outputPath = join(outDir, 'vpm.json');
   writeFileSync(outputPath, JSON.stringify(index, null, 2));
-  
   console.log(`\nGenerated ${outputPath}`);
-  console.log(`Total packages: ${Object.keys(packages).length}`);
+
+  // Write per-package listing files
+  const pkgOutDir = join(outDir, 'vpm');
+  mkdirSync(pkgOutDir, { recursive: true });
+
+  for (const [packageName, pkg] of Object.entries(packages)) {
+    const perPackageIndex = {
+      name: `${vpmConfig.name} – ${pkg.versions[Object.keys(pkg.versions)[0]]?.displayName || packageName}`,
+      id: `${vpmConfig.id}.${packageName}`,
+      url: pkg.listingUrl,
+      author: vpmConfig.author,
+      packages: { [packageName]: pkg }
+    };
+    const pkgPath = join(pkgOutDir, `${packageName}.json`);
+    writeFileSync(pkgPath, JSON.stringify(perPackageIndex, null, 2));
+    console.log(`  Generated ${pkgPath}`);
+  }
+
+  console.log(`\nTotal packages: ${Object.keys(packages).length}`);
   
   // Count total versions
   const totalVersions = Object.values(packages).reduce(

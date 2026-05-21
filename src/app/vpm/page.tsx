@@ -72,6 +72,7 @@ interface PackageVersion {
 interface PackageInfos {
   name: string
   url: string
+  listingUrl?: string
   category: PackageCategory
   release: PackageVersion
   versions: {
@@ -442,7 +443,7 @@ export default function VPMPage() {
                         </a>
                       )}
                       <a
-                        href={vccUrl}
+                        href={pkg.listingUrl ? `vcc://vpm/addRepo?url=${encodeURIComponent(pkg.listingUrl)}` : vccUrl}
                         className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-fd-primary text-fd-primary-foreground rounded-lg text-sm font-medium hover:bg-fd-primary/80 transition-colors"
                       >
                         <Plus size={16} />
