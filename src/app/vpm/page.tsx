@@ -676,24 +676,49 @@ export default function VPMPage() {
                   <div className="col-span-2">
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><History size={12} /> All versions</span>
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {Object.values(displayedPackage.versions).map((v, i) => (
-                        v.url ? (
-                          <a
-                            key={v.version}
-                            href={v.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : ''}`}
-                          >
-                            {v.version}{i === 0 && ' (latest)'}
-                            <Download size={12} />
-                          </a>
-                        ) : (
+                      {Object.values(displayedPackage.versions).map((v, i) => {
+                        const linkClass = `hover:text-fd-primary hover:underline inline-flex items-center gap-1 text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : ''}`
+                        const label = <>{v.version}{i === 0 && ' (latest)'}<Download size={12} /></>
+                        if (v.url && v.unitypackageUrl) {
+                          return (
+                            <DropdownMenu key={v.version}>
+                              <DropdownMenuTrigger asChild>
+                                <a href="#" onClick={e => e.preventDefault()} className={linkClass}>{label}</a>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent side="top" align="start">
+                                <DropdownMenuItem asChild>
+                                  <a href={v.unitypackageUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                    <UnityIcon size={14} /> Unity Package
+                                  </a>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <a href={v.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                    <Archive size={14} /> ZIP
+                                  </a>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )
+                        }
+                        if (v.url || v.unitypackageUrl) {
+                          return (
+                            <a
+                              key={v.version}
+                              href={v.url ?? v.unitypackageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={linkClass}
+                            >
+                              {label}
+                            </a>
+                          )
+                        }
+                        return (
                           <span key={v.version} className={`text-sm font-mono ${i === 0 ? 'text-fd-primary font-medium' : 'text-fd-muted-foreground'}`}>
                             {v.version}{i === 0 && ' (latest)'}
                           </span>
                         )
-                      ))}
+                      })}
                     </div>
                   </div>
                 )}
