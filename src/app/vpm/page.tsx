@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, Copy, Check, Search, Plus, ExternalLink, Info, Loader2, Globe, User, Wrench, Download, Scale, Boxes, History, Hash, Mail, Github, Users, Tag, FileBox, FileText, BookOpen, FileKey, Layers, ArrowUpRight } from 'lucide-react'
+import { Package, Copy, Check, Search, Plus, ExternalLink, Info, Loader2, Globe, User, Wrench, Download, Scale, Boxes, History, Hash, Mail, Github, Users, Tag, FileBox, FileText, BookOpen, FileKey, Layers, ArrowUpRight, Archive, MoreVertical } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { GlobeAltIcon as GlobeAltIconSolid, UserIcon as UserIconSolid, WrenchScrewdriverIcon as WrenchScrewdriverIconSolid } from '@heroicons/react/24/solid'
 import { Modal } from '@/components/Modal'
 import { HeroHeader } from '@/components/HeroHeader'
@@ -44,6 +46,8 @@ interface PackageVersion {
   changelogUrl?: string
   documentationUrl?: string
   licensesUrl?: string
+  unitypackageUrl?: string
+  manifestUrl?: string
   type?: string
   author?: {
     name: string
@@ -103,6 +107,41 @@ const categoryConfig: Record<PackageCategory, { label: string; icon: typeof Glob
   tool: { label: 'Tool', icon: Wrench, solidIcon: WrenchScrewdriverIconSolid, color: 'bg-green-500/10 text-green-500', borderColor: 'border-l-green-500', iconColor: 'text-green-500/10' },
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
+function DownloadButton({ href, icon: Icon, title }: {
+  href: string
+  icon: React.ComponentType<{ size?: number }>
+  title: string
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group inline-flex items-center justify-center px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
+      title={title}
+    >
+      <span className="relative">
+        <Icon size={20} />
+        <span className="absolute -bottom-1.5 -left-1.5 bg-fd-secondary group-hover:bg-fd-secondary rounded-full p-0.5 transition-colors">
+          <Download size={10} />
+        </span>
+      </span>
+    </a>
+  )
+}
+
 const UnityIcon = ({ size = 12 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <path d="m12.9288 4.2939 3.7997 2.1929c.1366.077.1415.2905 0 .3675l-4.515 2.6076a.4192.4192 0 0 1-.4246 0L7.274 6.8543c-.139-.0745-.1415-.293 0-.3675l3.7972-2.193V0L1.3758 5.5977V16.793l3.7177-2.1456v-4.3858c-.0025-.1565.1813-.2682.318-.1838l4.5148 2.6076a.4252.4252 0 0 1 .2136.3676v5.2127c.0025.1565-.1813.2682-.3179.1838l-3.7996-2.1929-3.7178 2.1457L12 24l9.6954-5.5977-3.7178-2.1457-3.7996 2.1929c-.1341.082-.3229-.0248-.3179-.1838V13.053c0-.1565.087-.2956.2136-.3676l4.5149-2.6076c.134-.082.3228.0224.3179.1838v4.3858l3.7177 2.1456V5.5977L12.9288 0Z"/>
@@ -110,6 +149,7 @@ const UnityIcon = ({ size = 12 }: { size?: number }) => (
 )
 
 export default function VPMPage() {
+  const isMobile = useIsMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [copied, setCopied] = useState(false)
   const [copiedListing, setCopiedListing] = useState(false)
@@ -526,7 +566,7 @@ export default function VPMPage() {
                     {displayedPackage.release.license}
                   </span>
                 )}
-                {displayedPackage.release.type && (
+                {displayedPackage.release.type && displayedPackage.release.type.toLowerCase() !== displayedPackage.category && (
                   <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium bg-fd-muted text-fd-muted-foreground">
                     <Layers size={12} />
                     {displayedPackage.release.type}
@@ -722,71 +762,107 @@ export default function VPMPage() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-2 mt-6 pt-4 border-t border-fd-border">
-                <a
-                  href={displayedPackage.listingUrl ? `vcc://vpm/addRepo?url=${encodeURIComponent(displayedPackage.listingUrl)}` : vccUrl}
-                  onClick={() => setSelectedPackage(null)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-primary text-fd-primary-foreground rounded-lg font-medium hover:bg-fd-primary/80 transition-colors"
-                >
-                  <Plus size={18} />
-                  Add to VCC
-                </a>
-                {displayedPackage.release.url && (
+              {(() => {
+                type OverflowItem = { href: string; icon: React.ReactNode; label: string }
+                const iconBtn = (href: string, icon: React.ReactNode, title: string) => (
                   <a
-                    href={displayedPackage.release.url}
+                    key={href}
+                    href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
-                    title="Download ZIP"
+                    className="inline-flex items-center justify-center px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
+                    title={title}
                   >
-                    <Download size={18} />
+                    {icon}
                   </a>
-                )}
-                {displayedPackage.release.documentationUrl && (
-                  <a
-                    href={displayedPackage.release.documentationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
-                    title="Documentation"
-                  >
-                    <BookOpen size={18} />
-                  </a>
-                )}
-                {displayedPackage.release.licensesUrl && (
-                  <a
-                    href={displayedPackage.release.licensesUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
-                    title="License"
-                  >
-                    <FileKey size={18} />
-                  </a>
-                )}
-                {displayedPackage?.url && (
-                  <a
-                    href={displayedPackage.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
-                    title="View on GitHub"
-                  >
-                    <Github size={18} />
-                  </a>
-                )}
-                {displayedPackage.release.changelogUrl && (
-                  <a
-                    href={displayedPackage.release.changelogUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors"
-                    title="View Changelog"
-                  >
-                    <FileText size={18} />
-                  </a>
-                )}
-              </div>
+                )
+
+                const dlBtns = [
+                  displayedPackage.release.unitypackageUrl
+                    ? <DownloadButton key="unity" href={displayedPackage.release.unitypackageUrl} icon={UnityIcon} title="Download .unitypackage" />
+                    : null,
+                  displayedPackage.release.url
+                    ? <DownloadButton key="zip" href={displayedPackage.release.url} icon={Archive} title="Download ZIP" />
+                    : null,
+                ].filter(Boolean)
+
+                const allSecondary: OverflowItem[] = [
+                  displayedPackage?.url ? { href: displayedPackage.url, icon: <Github size={18} />, label: 'View on GitHub' } : null,
+                  displayedPackage.release.documentationUrl ? { href: displayedPackage.release.documentationUrl, icon: <BookOpen size={18} />, label: 'Documentation' } : null,
+                  displayedPackage.release.licensesUrl ? { href: displayedPackage.release.licensesUrl, icon: <FileKey size={18} />, label: 'License' } : null,
+                  displayedPackage.release.changelogUrl ? { href: displayedPackage.release.changelogUrl, icon: <FileText size={18} />, label: 'View Changelog' } : null,
+                  displayedPackage.release.manifestUrl ? { href: displayedPackage.release.manifestUrl, icon: <FileBox size={18} />, label: 'View Manifest' } : null,
+                ].filter(Boolean) as OverflowItem[]
+
+                const topSlots = 3 - dlBtns.length
+                const topSecondary = allSecondary.slice(0, topSlots)
+                const overflow = allSecondary.slice(topSlots)
+
+                const overflowTrigger = overflow.length > 0 && (
+                  isMobile ? (
+                    <Drawer>
+                      <DrawerTrigger asChild>
+                        <button className="inline-flex items-center justify-center px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors">
+                          <MoreVertical size={18} />
+                        </button>
+                      </DrawerTrigger>
+                      <DrawerContent>
+                        <DrawerHeader>
+                          <DrawerTitle>More actions</DrawerTitle>
+                        </DrawerHeader>
+                        <div className="flex flex-col gap-1 p-4 pt-0">
+                          {overflow.map(item => (
+                            <a
+                              key={item.href}
+                              href={item.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-fd-accent transition-colors text-sm font-medium"
+                            >
+                              {item.icon}
+                              {item.label}
+                            </a>
+                          ))}
+                        </div>
+                      </DrawerContent>
+                    </Drawer>
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="inline-flex items-center justify-center px-4 py-3 bg-fd-secondary border border-fd-border rounded-lg font-medium hover:bg-fd-accent transition-colors">
+                          <MoreVertical size={18} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" side="top">
+                        {overflow.map(item => (
+                          <DropdownMenuItem key={item.href} asChild>
+                            <a href={item.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 cursor-pointer">
+                              {item.icon}
+                              {item.label}
+                            </a>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )
+                )
+
+                return (
+                  <div className="flex gap-2 mt-6 pt-4 border-t border-fd-border">
+                    <a
+                      href={displayedPackage.listingUrl ? `vcc://vpm/addRepo?url=${encodeURIComponent(displayedPackage.listingUrl)}` : vccUrl}
+                      onClick={() => setSelectedPackage(null)}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-primary text-fd-primary-foreground rounded-lg font-medium hover:bg-fd-primary/80 transition-colors"
+                    >
+                      <Plus size={18} />
+                      Add to VCC
+                    </a>
+                    {dlBtns}
+                    {topSecondary.map(item => iconBtn(item.href, item.icon, item.label))}
+                    {overflowTrigger}
+                  </div>
+                )
+              })()}
             </>
           )
         })()}
