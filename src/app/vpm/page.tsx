@@ -106,6 +106,7 @@ const categoryConfig: Record<PackageCategory, { label: string; icon: typeof Glob
 export default function VPMPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [copied, setCopied] = useState(false)
+  const [copiedListing, setCopiedListing] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [helpTab, setHelpTab] = useState<'auto' | 'manual'>('auto')
   const [vpm, setVPM] = useState<VPMIndex>({ name: '', packages: {} })
@@ -549,6 +550,25 @@ export default function VPMPage() {
                   <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><Package size={12} /> Package ID</span>
                   <p className="font-mono text-xs bg-fd-muted px-2 py-1 rounded truncate">{displayedPackage.name}</p>
                 </div>
+                {displayedPackage.listingUrl && (
+                  <div className="col-span-2">
+                    <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><ArrowUpRight size={12} /> Listing URL</span>
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(displayedPackage.listingUrl!)
+                        setCopiedListing(true)
+                        setTimeout(() => setCopiedListing(false), 2000)
+                      }}
+                      className="w-full inline-flex items-center gap-2 font-mono text-xs bg-fd-muted hover:bg-fd-accent px-2 py-1 rounded transition-colors cursor-pointer group"
+                      title="Copy listing URL"
+                    >
+                      <span className="truncate flex-1 text-left">{displayedPackage.listingUrl}</span>
+                      <span className="shrink-0 text-fd-muted-foreground group-hover:text-fd-primary transition-colors">
+                        {copiedListing ? <Check size={12} /> : <Copy size={12} />}
+                      </span>
+                    </button>
+                  </div>
+                )}
                 {displayedPackage.release.author?.name && (
                   <div>
                     <span className="text-fd-muted-foreground text-xs flex items-center gap-1.5 mb-1"><User size={12} /> Author</span>
@@ -697,7 +717,7 @@ export default function VPMPage() {
               {/* Actions */}
               <div className="flex gap-2 mt-6 pt-4 border-t border-fd-border">
                 <a
-                  href={vccUrl}
+                  href={displayedPackage.listingUrl ? `vcc://vpm/addRepo?url=${encodeURIComponent(displayedPackage.listingUrl)}` : vccUrl}
                   onClick={() => setSelectedPackage(null)}
                   className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-fd-primary text-fd-primary-foreground rounded-lg font-medium hover:bg-fd-primary/80 transition-colors"
                 >
